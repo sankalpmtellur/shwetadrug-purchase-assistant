@@ -1,0 +1,89 @@
+TASK 2 - Inspection Toolkit
+
+Goal:
+Build small utilities that help inspect any Windows desktop application.
+Do NOT automate anything yet.
+
+Create the following inside:
+
+app/tools/
+
+----------------------------------------
+1. window_detector.py
+----------------------------------------
+
+Functions:
+
+- List all currently opened windows
+- Print:
+    - Window title
+    - Whether visible
+- Return the list
+
+----------------------------------------
+2. mouse_tracker.py
+----------------------------------------
+
+Continuously print:
+
+Mouse X
+Mouse Y
+
+Update every 200ms.
+
+Exit on Ctrl+C.
+
+----------------------------------------
+3. screenshot_tool.py
+----------------------------------------
+
+Take a screenshot of the entire screen.
+
+Save inside:
+
+screenshots/
+
+Filename format:
+
+YYYY-MM-DD_HH-MM-SS.png
+
+----------------------------------------
+4. logger.py
+----------------------------------------
+
+Create a reusable logger.
+
+Store logs inside:
+
+logs/
+
+Format:
+
+timestamp
+level
+message
+
+----------------------------------------
+5. test_tools.py
+----------------------------------------
+
+Simple menu:
+
+1. Detect Windows
+2. Mouse Tracker
+3. Screenshot
+
+Run the selected tool.
+
+----------------------------------------
+Constraints
+
+Do NOT automate clicks.
+
+Do NOT move the mouse.
+
+Do NOT press keys.
+
+Do NOT detect images.
+
+Only inspection utilities.
