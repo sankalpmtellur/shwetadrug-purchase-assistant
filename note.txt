@@ -1,137 +1,47 @@
-TASK 9 - Dry Run / Simulation Mode
+TASK - Debug Window Detection
 
-Goal
+The window detector works from app/tools/window_detector.py.
 
-Before controlling Pharma Ultimate, simulate the complete import.
+The focus test does not.
 
-No keyboard or mouse actions should occur.
+Investigate why.
 
-----------------------------------------
+Requirements:
 
-Create
+1. Reuse the EXACT SAME detection logic from app/tools/window_detector.py.
 
-app/simulator/
+2. Do NOT create a second implementation.
 
-simulation_engine.py
+3. Print every window title found.
 
-----------------------------------------
+Example:
 
-Implement:
+Checking:
+Taskbar
 
-simulate(invoice)
+Checking:
+Administrator: Windows PowerShell
 
-Output should resemble:
+Checking:
+SHWETA DRUG DISTRIBUTORS -- PHARMA ULTIMATE Package Year : Current Year
 
-----------------------------------------
+4. Print the configured WINDOW_TITLE.
 
-Launch Pharma
+5. Print which comparison is being used.
 
-✓
+Example:
 
-Login
+Configured:
+PHARMA ULTIMATE
 
-✓
+Current:
+SHWETA DRUG DISTRIBUTORS -- PHARMA ULTIMATE Package Year : Current Year
 
-Open Purchase Window
+Match:
+True
 
-✓
+6. Fix the focus test so it uses exactly the same matching logic as the detector.
 
-Header
+Do not modify automation yet.
 
-Date : 03/08/2026
-
-Supplier : CIPLA
-
-Bill No : 24563
-
-Today's Date : 06/08/2026
-
-----------------------------------------
-
-Medicine 1
-
-Select Medicine
-
-DOLO 650 TAB
-
-Batch
-
-AB1234
-
-Expiry
-
-01.10.27
-
-Qty
-
-10
-
-Free
-
-0
-
-PRate
-
-11.25
-
-MRP
-
-15.00
-
-SRate
-
-14.00
-
-Discount
-
-12
-
-----------------------------------------
-
-Medicine 2
-
-...
-
-----------------------------------------
-
-Summary
-
-Supplier
-
-Invoice Number
-
-Medicines
-
-Estimated Keyboard Actions
-
-Estimated Time
-
-----------------------------------------
-
-Validation
-
-Show missing supplier.
-
-Show missing medicine.
-
-Show invalid batch.
-
-Show invalid quantity.
-
-----------------------------------------
-
-No keyboard.
-
-No mouse.
-
-No pyautogui.
-
-Pure simulation.
-
-----------------------------------------
-
-Testing
-
-tests/test_simulation.py
-
-Verify printed workflow.
+Only debug window detection.
