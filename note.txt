@@ -1,89 +1,153 @@
-TASK 2 - Inspection Toolkit
+TASK 4 - Build Automation Engine Foundation
 
-Goal:
-Build small utilities that help inspect any Windows desktop application.
-Do NOT automate anything yet.
+Goal
 
-Create the following inside:
+Create the automation layer that will later control Pharma Ultimate.
 
-app/tools/
+DO NOT start entering medicines yet.
 
-----------------------------------------
-1. window_detector.py
-----------------------------------------
+Only create a clean automation framework.
+
+--------------------------------------------------
+Create
+
+app/automation/
+
+Inside create:
+
+window_manager.py
+
+keyboard_controller.py
+
+automation_engine.py
+
+config.py
+
+--------------------------------------------------
+1. window_manager.py
 
 Functions:
 
-- List all currently opened windows
-- Print:
-    - Window title
-    - Whether visible
-- Return the list
+- Check whether Pharma Ultimate is running.
+- Get window title.
+- Bring Pharma window to front.
+- Maximize if minimized.
+- Return success/failure.
 
-----------------------------------------
-2. mouse_tracker.py
-----------------------------------------
+DO NOT hardcode coordinates.
 
-Continuously print:
+--------------------------------------------------
+2. keyboard_controller.py
 
-Mouse X
-Mouse Y
+Create reusable functions:
 
-Update every 200ms.
+write(text)
 
-Exit on Ctrl+C.
+press_enter()
 
-----------------------------------------
-3. screenshot_tool.py
-----------------------------------------
+press_tab()
 
-Take a screenshot of the entire screen.
+press_ctrl_p()
 
-Save inside:
+press_down()
 
-screenshots/
+press_up()
 
-Filename format:
+press_escape()
 
-YYYY-MM-DD_HH-MM-SS.png
+hotkey(...)
 
-----------------------------------------
-4. logger.py
-----------------------------------------
+small_delay()
 
-Create a reusable logger.
+medium_delay()
 
-Store logs inside:
+large_delay()
 
-logs/
+Everything should use one centralized implementation.
 
-Format:
+--------------------------------------------------
+3. config.py
 
-timestamp
-level
-message
+Create configurable timings.
 
-----------------------------------------
-5. test_tools.py
-----------------------------------------
+Example:
 
-Simple menu:
+SHORT_DELAY
 
-1. Detect Windows
-2. Mouse Tracker
-3. Screenshot
+MEDIUM_DELAY
 
-Run the selected tool.
+LONG_DELAY
 
-----------------------------------------
+SEARCH_DELAY
+
+DO NOT hardcode sleep values throughout the code.
+
+--------------------------------------------------
+4. automation_engine.py
+
+Create class:
+
+PurchaseAutomation
+
+Methods only.
+
+No implementation yet.
+
+Methods:
+
+launch_pharma()
+
+login()
+
+open_purchase_window()
+
+fill_header()
+
+fill_items()
+
+save_purchase()
+
+run()
+
+Every method should currently log:
+
+"Not Implemented"
+
+The goal is architecture.
+
+--------------------------------------------------
+5. Logging
+
+Every action should log:
+
+Timestamp
+
+Action
+
+Success/Failure
+
+--------------------------------------------------
+6. Test
+
+Create:
+
+tests/test_automation.py
+
+Verify:
+
+Window detection works.
+
+Keyboard helper functions execute without exceptions.
+
+Automation object initializes.
+
+--------------------------------------------------
 Constraints
 
-Do NOT automate clicks.
+Do NOT automate purchase entry yet.
 
-Do NOT move the mouse.
+Do NOT hardcode mouse positions.
 
-Do NOT press keys.
+Do NOT hardcode keyboard sequence.
 
-Do NOT detect images.
-
-Only inspection utilities.
+Only build the reusable automation foundation.

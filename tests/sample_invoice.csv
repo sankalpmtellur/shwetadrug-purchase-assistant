@@ -1,0 +1,7 @@
+Supplier Name,ABC Pharma Distributors
+Invoice Number,INV-1001
+Invoice Date,2026-08-06
+
+Medicine Name,Batch Number,Expiry,Quantity,Free,Purchase Rate,MRP,Sale Rate,Discount %,Unnecessary Column
+Paracetamol 500mg,BT001,10/27,10,1,12.50,20.00,18.00,5,ignored
+Vitamin C 1000mg,BT002,11/28,5,0,90.00,120.00,110.00,2,ignored
