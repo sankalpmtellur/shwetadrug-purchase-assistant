@@ -1,151 +1,93 @@
-TASK - Update Live One Medicine Test
+TASK 10 - Structured Text Import
 
-Modify ONLY:
+Goal
 
-tests/test_medicine_live.py
+Instead of reading CSV, the Purchase Assistant should accept structured text copied from ChatGPT.
 
-Do NOT modify the production automation.
-
-This is only for the live integration test.
+Do NOT build GUI yet.
 
 --------------------------------------------------
-HEADER
+Create
+
+app/core/text_parser.py
+
 --------------------------------------------------
 
-Use the already verified header flow.
+Input
 
-Invoice Date:
-03-08-2026
+A multiline text pasted by the employee.
 
-Press Enter.
-
-Press Enter 5 times until Supplier.
+Example format:
 
 Supplier:
 Ajit Agencies
 
-Press Enter.
-
-Supplier Bill Number:
+Invoice Number:
 12345
 
-Press Enter.
+Invoice Date:
+03-08-2026
 
-Supplier Bill Date:
-06-08-2026
+Medicines:
 
-Press Enter.
+1.
+Name: Acenal P tablet
+Batch: 11111
+Expiry: 01-02-2028
+Quantity: 30
+Free: 0
+PRate: 100
+MRP: 150
+SRate: 200
+Discount: 10
 
---------------------------------------------------
-FIRST MEDICINE ONLY
---------------------------------------------------
-
-SI No.
-
-Already auto-generated.
-
-Press Enter once to reach Item Description.
-
---------------------------------------------------
-Item Description
---------------------------------------------------
-
-Type:
-
-Acenal P tablet
-
-Select it from the dropdown.
-
-Press Enter.
+2.
+...
 
 --------------------------------------------------
-Batch Number
---------------------------------------------------
 
-11111
+Output
 
-Press Enter.
+Convert the pasted text into the existing:
 
---------------------------------------------------
-Expiry Date
---------------------------------------------------
+Invoice
 
-Type exactly:
+InvoiceItem
 
-01-02-2028
+objects.
 
-Press Enter.
+Reuse existing models.
 
 --------------------------------------------------
-Quantity
---------------------------------------------------
 
-30
+Validation
 
-Press Enter.
+Reuse all existing validation.
 
---------------------------------------------------
-Free
---------------------------------------------------
-
-Leave blank.
-
-Simply press Enter.
+Do not duplicate code.
 
 --------------------------------------------------
-Purchase Rate (PRate)
---------------------------------------------------
 
-100
+Testing
 
-Press Enter.
+Create:
 
---------------------------------------------------
-MRP
---------------------------------------------------
+tests/test_text_parser.py
 
-150
+Use sample text.
 
-Press Enter.
+Verify Invoice object is created correctly.
 
 --------------------------------------------------
-Sale Rate (SRate)
---------------------------------------------------
 
-200
+Constraints
 
-Press Enter.
+Do NOT modify automation.
 
---------------------------------------------------
-Discount
---------------------------------------------------
+Do NOT modify header logic.
 
-10
+Do NOT modify medicine logic.
 
-(No % symbol.)
+Only replace the input source.
 
-Press Enter.
-
---------------------------------------------------
-Remaining Columns
---------------------------------------------------
-
-Press Enter FIVE (5) times
-
-until the cursor reaches the SI No. of the next row.
-
-STOP.
-
---------------------------------------------------
-Safety
---------------------------------------------------
-
-Do NOT enter a second medicine.
-
-Do NOT save.
-
-Do NOT close the Purchase Entry window.
-
-Do NOT modify production automation.
-
-Only update the live test with the above values and navigation.
+The automation should not know whether the data came from CSV or ChatGPT.
