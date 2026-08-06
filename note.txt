@@ -1,159 +1,150 @@
-TASK 12 - Connect GUI to Production Automation
+TASK - Fix Header Navigation & Dynamic Supplier Extraction
 
-Goal
+The first real-world test exposed a few issues. Please implement the following changes only.
 
-Make the Purchase Assistant functional.
+1. Supplier Extraction (IMPORTANT)
 
---------------------------------------------------
+Currently the parser hardcodes:
 
-When Preview is clicked
+Ajit Agencies
+
+Remove this completely.
+
+Instead, extract the supplier/company name dynamically from the uploaded invoice.
+
+Examples:
+
+Narnkar & Co.
+ABC Pharma
+Torrent Pharmaceuticals
+Sun Pharma
+
+The supplier must always come from the invoice.
+
+Never hardcode it.
+
+2. Header Navigation Fix
+
+Current automation is incorrect.
+
+Current flow:
+
+Invoice Date
+↓
+
+Enter ×5
 
 ↓
 
-Parse the pasted ChatGPT output.
+Supplier
+
+This is wrong.
+
+Correct flow:
+
+Invoice Date
+↓
+
+Enter ×4
 
 ↓
 
-Show the Invoice Preview.
-
-(This already exists.)
-
---------------------------------------------------
-
-When Start Import is clicked
+Supplier
 
 ↓
 
-Validate the parsed Invoice.
+Bill Number
 
 ↓
 
-If validation fails
+Bill Date
 
-Show a dialog.
+One extra Enter is causing the supplier name to be typed into the Supplier Bill No field.
 
-Do not start automation.
+Reduce the Enter presses after the invoice date from 5 to 4.
 
---------------------------------------------------
+3. Invoice Fields
 
-If validation succeeds
+Ensure these are extracted dynamically from every invoice:
+
+Supplier Name
+Invoice Number
+Invoice Date
+
+Do not hardcode any of these.
+
+4. Medicine Entry Flow
+
+The correct navigation is:
+
+SI No (auto)
 
 ↓
 
-Pass the existing Invoice object directly into:
+Enter
 
-PurchaseAutomation.run(invoice)
+↓
 
-Do NOT create a second parser.
+Medicine Name
 
-Do NOT reconstruct the invoice.
+↓
 
-Reuse the already parsed object.
+Batch
 
---------------------------------------------------
+↓
 
-During Import
+Expiry
 
-Update the Progress Panel.
+↓
 
-Example:
+Quantity
 
-Preparing...
+↓
 
-Opening Pharma...
+Free
 
-Logging In...
+↓
 
-Opening Purchase Window...
+Purchase Rate
 
-Entering Header...
+↓
 
-Medicine 1 / 120
+MRP
 
-Medicine 2 / 120
+↓
 
-...
+Sale Rate
 
-Saving...
+↓
 
-Completed
+Discount
 
---------------------------------------------------
+↓
 
-Emergency Stop
+Enter ×5
 
-Connect it to the existing automation.
+↓
 
-When pressed:
+Next SI No
 
-Stop the automation safely.
+Ensure the automation starts each medicine row by pressing one Enter from the auto-filled SI No field before typing the medicine name.
 
-Update status.
+5. Do NOT Change
 
---------------------------------------------------
+Do not modify:
 
-Completion
-
-Show a dialog.
-
-Example:
-
-Import Completed
-
-Imported:
-
-118
-
-Failed:
-
-2
-
-Duration:
-
-2m 15s
-
---------------------------------------------------
-
-Architecture
-
+Parser architecture
+Validation
+Preview
+Simulation mode
 GUI
+Automation timing
+Save workflow
 
-↓
+Only fix the issues mentioned above.
 
-Text Parser
+After implementing, provide:
 
-↓
-
-Invoice
-
-↓
-
-Automation Engine
-
-↓
-
-Progress Updates
-
-↓
-
-Summary
-
-Do not duplicate any logic.
-
-Only connect the existing modules.
-
---------------------------------------------------
-
-Testing
-
-Run the GUI.
-
-Paste sample ChatGPT output.
-
-Preview.
-
-Start Import.
-
-Verify progress updates correctly.
-
-No UI redesign.
+Files modified
+What changed
+Confirmation that the header navigation now follows the corrected workflow exactly.

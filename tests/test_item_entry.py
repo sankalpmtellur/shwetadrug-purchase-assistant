@@ -75,7 +75,7 @@ def test_fill_items_sequence():
             "18.00",
             "5",
         ]
-        assert enter.call_count == 12
+        assert enter.call_count == 14
 
 
 def test_fill_items_failure_continues():

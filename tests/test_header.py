@@ -62,14 +62,14 @@ def test_fill_header_sequence_and_supplier_helper():
         patch("app.automation.automation_engine.keyboard_controller.press_enter", return_value=True) as enter, \
         patch("app.automation.automation_engine.select_supplier", return_value=True) as supplier, \
         patch("app.automation.automation_engine.format_today_date", return_value="06-08-2026"), \
-        patch("app.automation.config.SUPPLIER_FIELD_TAB_COUNT", 3):
+        patch("app.automation.config.SUPPLIER_FIELD_TAB_COUNT", 4):
         assert automation.fill_header(invoice) is True
 
         assert write.call_args_list[0].args[0] == "06/08/2026"
         assert write.call_args_list[1].args[0] == "INV-1001"
         assert write.call_args_list[2].args[0] == "06-08-2026"
         supplier.assert_called_once_with("ABC Pharma")
-        assert enter.call_count == 8
+        assert enter.call_count == 6
 
 
 if __name__ == "__main__":

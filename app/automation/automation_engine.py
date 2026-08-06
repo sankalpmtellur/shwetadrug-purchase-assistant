@@ -125,15 +125,8 @@ class PurchaseAutomation:
 
         self._log_action("Entering Date", True, invoice_date)
         steps.append(keyboard_controller.write(invoice_date))
-        steps.append(keyboard_controller.press_enter())
 
-        self._log_action("Confirming Credit", True)
-        steps.append(keyboard_controller.press_enter())
-
-        self._log_action("Confirming P Purc.", True)
-        steps.append(keyboard_controller.press_enter())
-
-        self._log_action("Skipping to Supplier", True)
+        self._log_action("Navigating to Supplier", True)
         for _index in range(config.SUPPLIER_FIELD_TAB_COUNT):
             steps.append(keyboard_controller.press_enter())
 
@@ -290,6 +283,10 @@ class PurchaseAutomation:
         return True
 
     def _fill_single_item(self, item):
+        if not keyboard_controller.press_enter():
+            self._log_action("Move from SI No to Medicine Name", False, item.medicine_name)
+            return False
+
         self._log_action("Selecting Medicine", True, item.medicine_name)
         if not select_medicine(item.medicine_name):
             self._log_action("Selecting Medicine", False, item.medicine_name)
