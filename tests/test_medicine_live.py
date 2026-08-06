@@ -13,7 +13,6 @@ for path in (PROJECT_ROOT, TESTS_DIR):
 from app.automation import config
 from app.tools.window_detector import find_window_by_title, focus_window
 from test_header_live import (
-    enter_header,
     get_pyautogui,
     press_enter,
     wait_for_window,
@@ -21,15 +20,44 @@ from test_header_live import (
 )
 
 
-MEDICINE_NAME = "DOLO 650 TAB"
-BATCH_NUMBER = "ABCD123"
-EXPIRY = "01.10.27"
-QUANTITY = "10"
-PURCHASE_RATE = "12.50"
-MRP = "15.00"
-SALE_RATE = "14.00"
+INVOICE_DATE = "03-08-2026"
+SUPPLIER_NAME = "Ajit Agencies"
+SUPPLIER_BILL_NUMBER = "12345"
+SUPPLIER_BILL_DATE = "06-08-2026"
+ENTERS_TO_SUPPLIER_FIELD = 5
+
+MEDICINE_NAME = "Acenal P tablet"
+BATCH_NUMBER = "11111"
+EXPIRY = "01-02-2028"
+QUANTITY = "30"
+PURCHASE_RATE = "100"
+MRP = "150"
+SALE_RATE = "200"
 DISCOUNT = "10"
-REMAINING_COLUMN_ENTERS = 4
+REMAINING_COLUMN_ENTERS = 5
+
+
+def type_supplier(pyautogui, supplier_name):
+    for character in supplier_name:
+        pyautogui.write(character)
+        time.sleep(config.SEARCH_DELAY)
+    press_enter(pyautogui)
+
+
+def enter_header(pyautogui):
+    write_text(pyautogui, INVOICE_DATE)
+    press_enter(pyautogui)
+
+    for _index in range(ENTERS_TO_SUPPLIER_FIELD):
+        press_enter(pyautogui)
+
+    type_supplier(pyautogui, SUPPLIER_NAME)
+
+    write_text(pyautogui, SUPPLIER_BILL_NUMBER)
+    press_enter(pyautogui)
+
+    write_text(pyautogui, SUPPLIER_BILL_DATE)
+    press_enter(pyautogui)
 
 
 def type_medicine(pyautogui, medicine_name):
@@ -40,6 +68,8 @@ def type_medicine(pyautogui, medicine_name):
 
 
 def enter_one_medicine(pyautogui):
+    press_enter(pyautogui)
+
     type_medicine(pyautogui, MEDICINE_NAME)
 
     write_text(pyautogui, BATCH_NUMBER)

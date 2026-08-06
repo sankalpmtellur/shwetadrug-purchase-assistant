@@ -1,55 +1,151 @@
-TASK COMPLETED - Live One Medicine Entry Test
+TASK - Update Live One Medicine Test
 
-Created:
+Modify ONLY:
 
 tests/test_medicine_live.py
 
-What it does:
+Do NOT modify the production automation.
 
-1. Detects Pharma Ultimate using the shared detector logic from app/tools/window_detector.py.
-2. Brings Pharma Ultimate to the foreground.
-3. Presses Ctrl + P.
-4. Waits for the Purchase Bill / Purchase Entry window.
-5. Reuses the already verified header entry logic from tests/test_header_live.py.
-6. Enters exactly one medicine:
-   - Item Description: DOLO 650 TAB
-   - Batch: ABCD123
-   - Expiry: 01.10.27
-   - Quantity: 10
-   - Free: blank, Enter only
-   - Purchase Rate: 12.50
-   - MRP: 15.00
-   - Sale Rate: 14.00
-   - Discount: 10
-7. Presses Enter through the remaining columns.
-8. Stops.
+This is only for the live integration test.
 
-Safety:
+--------------------------------------------------
+HEADER
+--------------------------------------------------
 
-- Does not enter a second medicine row.
-- Does not save.
-- Does not close the Purchase window.
-- Does not modify production automation.
+Use the already verified header flow.
 
-Output:
+Invoice Date:
+03-08-2026
 
-Medicine Entry Successful
+Press Enter.
 
-or
+Press Enter 5 times until Supplier.
 
-Medicine Entry Failed
+Supplier:
+Ajit Agencies
 
-Verification:
+Press Enter.
 
-Ran:
+Supplier Bill Number:
+12345
 
-python3 -m py_compile tests/test_medicine_live.py
-python3 tests/test_medicine_live.py
+Press Enter.
 
-Result:
+Supplier Bill Date:
+06-08-2026
 
-Syntax check passed.
-Live run failed safely in this environment with:
+Press Enter.
 
-Header Entry Failed: pyautogui unavailable: No module named 'pyautogui'
-Medicine Entry Failed
+--------------------------------------------------
+FIRST MEDICINE ONLY
+--------------------------------------------------
+
+SI No.
+
+Already auto-generated.
+
+Press Enter once to reach Item Description.
+
+--------------------------------------------------
+Item Description
+--------------------------------------------------
+
+Type:
+
+Acenal P tablet
+
+Select it from the dropdown.
+
+Press Enter.
+
+--------------------------------------------------
+Batch Number
+--------------------------------------------------
+
+11111
+
+Press Enter.
+
+--------------------------------------------------
+Expiry Date
+--------------------------------------------------
+
+Type exactly:
+
+01-02-2028
+
+Press Enter.
+
+--------------------------------------------------
+Quantity
+--------------------------------------------------
+
+30
+
+Press Enter.
+
+--------------------------------------------------
+Free
+--------------------------------------------------
+
+Leave blank.
+
+Simply press Enter.
+
+--------------------------------------------------
+Purchase Rate (PRate)
+--------------------------------------------------
+
+100
+
+Press Enter.
+
+--------------------------------------------------
+MRP
+--------------------------------------------------
+
+150
+
+Press Enter.
+
+--------------------------------------------------
+Sale Rate (SRate)
+--------------------------------------------------
+
+200
+
+Press Enter.
+
+--------------------------------------------------
+Discount
+--------------------------------------------------
+
+10
+
+(No % symbol.)
+
+Press Enter.
+
+--------------------------------------------------
+Remaining Columns
+--------------------------------------------------
+
+Press Enter FIVE (5) times
+
+until the cursor reaches the SI No. of the next row.
+
+STOP.
+
+--------------------------------------------------
+Safety
+--------------------------------------------------
+
+Do NOT enter a second medicine.
+
+Do NOT save.
+
+Do NOT close the Purchase Entry window.
+
+Do NOT modify production automation.
+
+Only update the live test with the above values and navigation.
