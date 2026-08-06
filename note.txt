@@ -1,47 +1,24 @@
-TASK - Debug Window Detection
+Create tests/test_open_purchase.py
 
-The window detector works from app/tools/window_detector.py.
+Goal:
 
-The focus test does not.
+1. Detect Pharma Ultimate.
+2. Bring it to the foreground.
+3. Wait 1 second.
+4. Press Ctrl + P.
+5. Wait 3 seconds.
+6. Print:
 
-Investigate why.
+Purchase Window Opened
 
-Requirements:
+or
 
-1. Reuse the EXACT SAME detection logic from app/tools/window_detector.py.
+Purchase Window Failed
 
-2. Do NOT create a second implementation.
+Do NOT enter dates.
 
-3. Print every window title found.
+Do NOT type username.
 
-Example:
+Do NOT enter medicines.
 
-Checking:
-Taskbar
-
-Checking:
-Administrator: Windows PowerShell
-
-Checking:
-SHWETA DRUG DISTRIBUTORS -- PHARMA ULTIMATE Package Year : Current Year
-
-4. Print the configured WINDOW_TITLE.
-
-5. Print which comparison is being used.
-
-Example:
-
-Configured:
-PHARMA ULTIMATE
-
-Current:
-SHWETA DRUG DISTRIBUTORS -- PHARMA ULTIMATE Package Year : Current Year
-
-Match:
-True
-
-6. Fix the focus test so it uses exactly the same matching logic as the detector.
-
-Do not modify automation yet.
-
-Only debug window detection.
+Only test Ctrl + P.
