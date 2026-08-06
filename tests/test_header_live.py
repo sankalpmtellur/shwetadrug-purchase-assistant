@@ -12,9 +12,10 @@ from app.automation import config
 from app.tools.window_detector import find_window_by_title, focus_window
 
 
-INVOICE_DATE = "03/08/2026"
-SUPPLIER_NAME = "CIPLA"
-SUPPLIER_BILL_NUMBER = "24563"
+INVOICE_DATE = "03-08-2026"
+SUPPLIER_NAME = "Ajit Agencies"
+SUPPLIER_BILL_NUMBER = "12345"
+ENTERS_TO_SUPPLIER_FIELD = 5
 
 
 def get_pyautogui():
@@ -62,10 +63,7 @@ def enter_header(pyautogui):
     write_text(pyautogui, INVOICE_DATE)
     press_enter(pyautogui)
 
-    press_enter(pyautogui)
-    press_enter(pyautogui)
-
-    for _index in range(config.SUPPLIER_FIELD_TAB_COUNT):
+    for _index in range(ENTERS_TO_SUPPLIER_FIELD):
         press_enter(pyautogui)
 
     type_supplier(pyautogui, SUPPLIER_NAME)

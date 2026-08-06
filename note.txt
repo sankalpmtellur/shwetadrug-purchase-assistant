@@ -1,46 +1,68 @@
-TASK COMPLETED - Live Header Entry Test
+TASK COMPLETED - Fix Live Header Entry Flow
 
-Created:
+Updated:
 
 tests/test_header_live.py
 
-What it does:
+Changes made:
 
-1. Detects the Pharma Ultimate window using the shared detector logic from app/tools/window_detector.py.
-2. Brings Pharma Ultimate to the foreground.
-3. Presses Ctrl + P.
-4. Waits for the Purchase Bill / Purchase Entry window.
-5. Enters only the hardcoded header values:
-   - Invoice Date: 03/08/2026
-   - Credit: Enter
-   - P Purc.: Enter
-   - Supplier: CIPLA
-   - Supplier Bill Number: 24563
-   - Today's Date: system date in DD-MM-YYYY format
-6. Stops after header entry.
+1. Invoice Date
 
-Safety:
+Changed from:
 
-- Does not enter medicines.
-- Does not save.
-- Does not close the Purchase window.
-- Does not type username or password.
-- Only uses Ctrl + P and header-entry keyboard actions.
+03/08/2026
+
+to:
+
+03-08-2026
+
+Format is now DD-MM-YYYY.
+
+2. Navigation
+
+After entering the invoice date and pressing Enter, the script now presses Enter exactly five (5) more times to reach the Supplier field.
+
+Removed previous config-based supplier skip logic from this live test.
+
+3. Supplier
+
+Changed hardcoded supplier to:
+
+Ajit Agencies
+
+The live test types the supplier and presses Enter.
+
+No dropdown arrow logic was added.
+
+4. Supplier Bill Number
+
+Changed hardcoded bill number to:
+
+12345
+
+The script types it and presses Enter.
+
+5. Supplier Bill Date
+
+The script enters today's system date in DD-MM-YYYY format and presses Enter.
+
+6. Stop Point
+
+The script stops after Supplier Bill Date.
+
+It does not:
+
+- enter medicines
+- save
+- close the Purchase window
+- modify production automation
 
 Verification:
 
 Ran:
 
 python3 -m py_compile tests/test_header_live.py
-python3 tests/test_header_live.py
 
 Result:
 
 Syntax check passed.
-Live run failed safely in this environment with:
-
-Header Entry Failed: pyautogui unavailable: No module named 'pyautogui'
-
-Note:
-
-This is a live Windows/Pharma test. On this macOS environment, the actual live run is expected to fail gracefully if pyautogui/pywinauto or the Pharma window is unavailable.
