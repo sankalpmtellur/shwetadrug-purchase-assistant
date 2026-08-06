@@ -1,4 +1,5 @@
 import tkinter as tk
+import threading
 from tkinter import messagebox, ttk
 
 from app.automation.automation_engine import PurchaseAutomation
@@ -14,7 +15,8 @@ class PurchaseAssistantWindow(tk.Tk):
         self.geometry("1000x700")
         self.minsize(900, 600)
         self.current_invoice = None
-        self.automation = PurchaseAutomation()
+        self.is_import_running = False
+        self.automation = PurchaseAutomation(progress_callback=self.handle_progress)
 
         self._configure_styles()
         self._build()
@@ -128,17 +130,34 @@ class PurchaseAssistantWindow(tk.Tk):
         self.progress_panel.set_status("Preview Ready")
 
     def start_import(self):
+        if self.is_import_running:
+            messagebox.showinfo("Start Import", "Import is already running.")
+            return
+
         if self.current_invoice is None:
             self.preview_invoice()
 
         if self.current_invoice is None:
             return
 
-        self.progress_panel.set_status("Start Import wired to automation engine")
-        messagebox.showinfo(
-            "Start Import",
-            "Automation engine is wired. Live import execution will be enabled later.",
+        if self.current_invoice.validation_errors:
+            messagebox.showerror(
+                "Validation Failed",
+                "\n".join(self.current_invoice.validation_errors),
+            )
+            self.progress_panel.set_status("Validation Failed")
+            return
+
+        self.is_import_running = True
+        self.progress_panel.set_progress(0)
+        self.progress_panel.set_status("Preparing...")
+
+        thread = threading.Thread(
+            target=self._run_import,
+            args=(self.current_invoice,),
+            daemon=True,
         )
+        thread.start()
 
     def clear(self):
         self.input_text.delete("1.0", tk.END)
@@ -147,5 +166,56 @@ class PurchaseAssistantWindow(tk.Tk):
         self.progress_panel.reset()
 
     def emergency_stop(self):
-        self.progress_panel.set_progress(0)
+        self.automation.stop()
         self.progress_panel.set_status("Automation Stopped")
+
+    def handle_progress(self, status, value=None):
+        self.after(0, self._apply_progress, status, value)
+
+    def _apply_progress(self, status, value=None):
+        self.progress_panel.set_status(status)
+        if value is not None:
+            self.progress_panel.set_progress(value)
+
+    def _run_import(self, invoice):
+        try:
+            summary = self.automation.run(invoice)
+        except Exception as error:
+            self.after(0, self._show_import_error, error)
+            return
+
+        self.after(0, self._show_completion, summary)
+
+    def _show_import_error(self, error):
+        self.is_import_running = False
+        self.progress_panel.set_status("Import Failed")
+        messagebox.showerror("Import Failed", str(error))
+
+    def _show_completion(self, summary):
+        self.is_import_running = False
+
+        if self.automation.stop_requested:
+            self.progress_panel.set_status("Automation Stopped")
+            messagebox.showinfo("Automation Stopped", "Automation Stopped")
+            return
+
+        duration_text = format_duration(summary.duration)
+        self.progress_panel.set_status("Completed")
+        self.progress_panel.set_progress(100)
+        messagebox.showinfo(
+            "Import Completed",
+            "Import Completed\n\n"
+            f"Imported: {summary.imported_successfully}\n"
+            f"Failed: {summary.failed}\n"
+            f"Duration: {duration_text}",
+        )
+
+
+def format_duration(seconds):
+    total_seconds = int(seconds)
+    minutes = total_seconds // 60
+    remaining_seconds = total_seconds % 60
+
+    if minutes:
+        return f"{minutes}m {remaining_seconds}s"
+    return f"{remaining_seconds}s"

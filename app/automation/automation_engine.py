@@ -16,8 +16,20 @@ from app.tools.logger import get_import_logger, get_logger
 
 
 class PurchaseAutomation:
-    def __init__(self):
+    def __init__(self, progress_callback=None):
         self.logger = get_logger(self.__class__.__name__)
+        self.progress_callback = progress_callback
+        self.stop_requested = False
+
+    def stop(self):
+        self.stop_requested = True
+        self._set_progress("Automation Stopped")
+
+    def _should_stop(self):
+        if self.stop_requested:
+            self._log_action("stop", False, "Automation stopped by user")
+            return True
+        return False
 
     def launch_pharma(self):
         self._log_action("launch_pharma", True, "Starting")
@@ -146,6 +158,14 @@ class PurchaseAutomation:
         failed_items = []
 
         for index, item in enumerate(invoice.items, start=1):
+            if self._should_stop():
+                failed_items.extend(invoice.items[index - 1 :])
+                break
+
+            progress_value = 50
+            if total:
+                progress_value = 50 + int((index / total) * 35)
+            self._set_progress(f"Medicine {index} / {total}", progress_value)
             self._log_action(
                 f"Medicine {index} / {total}",
                 True,
@@ -176,6 +196,9 @@ class PurchaseAutomation:
         )
 
     def save_purchase(self):
+        if self._should_stop():
+            return False
+
         self._log_action("save_purchase", True, "Starting")
 
         if not press_enters(config.SAVE_BUTTON_ENTER_COUNT):
@@ -208,8 +231,10 @@ class PurchaseAutomation:
         return closed
 
     def run(self, invoice):
+        self.stop_requested = False
         start_time = datetime.now()
         self.import_logger = get_import_logger(start_time)
+        self._set_progress("Preparing...", 0)
         self._log_action("run", True, "Starting import")
 
         import_result = ImportResult(
@@ -220,21 +245,41 @@ class PurchaseAutomation:
         )
         saved_successfully = False
 
+        if self._should_stop():
+            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+
+        self._set_progress("Opening Pharma...", 10)
+        self._set_progress("Logging In...", 20)
         if not self.login():
             self._log_action("run", False, "Login failed")
             return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
+        if self._should_stop():
+            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+
+        self._set_progress("Opening Purchase Window...", 35)
         if not self.open_purchase_window():
             self._log_action("run", False, "Purchase window failed")
             return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
+        if self._should_stop():
+            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+
+        self._set_progress("Entering Header...", 50)
         if not self.fill_header(invoice):
             self._log_action("run", False, "Header entry failed")
             return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
         import_result = self.fill_items(invoice)
+
+        if self._should_stop():
+            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+
+        self._set_progress("Saving...", 90)
         saved_successfully = self.save_purchase()
-        return self._build_summary(invoice, import_result, start_time, saved_successfully)
+        summary = self._build_summary(invoice, import_result, start_time, saved_successfully)
+        self._set_progress("Completed", 100)
+        return summary
 
     def verify_date_field_ready(self):
         self._log_action("verify_date_field_ready", True, "Assuming active field after window ready")
@@ -275,6 +320,10 @@ class PurchaseAutomation:
         self.logger.info("Action: %s | Result: %s%s", action, status, detail)
         if hasattr(self, "import_logger"):
             self.import_logger.info("Action: %s | Result: %s%s", action, status, detail)
+
+    def _set_progress(self, status, value=None):
+        if self.progress_callback:
+            self.progress_callback(status, value)
 
     def _build_summary(self, invoice, import_result, start_time, saved_successfully):
         end_time = datetime.now()
