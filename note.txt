@@ -1,24 +1,46 @@
-Create tests/test_open_purchase.py
+TASK COMPLETED - Live Header Entry Test
 
-Goal:
+Created:
 
-1. Detect Pharma Ultimate.
-2. Bring it to the foreground.
-3. Wait 1 second.
-4. Press Ctrl + P.
-5. Wait 3 seconds.
-6. Print:
+tests/test_header_live.py
 
-Purchase Window Opened
+What it does:
 
-or
+1. Detects the Pharma Ultimate window using the shared detector logic from app/tools/window_detector.py.
+2. Brings Pharma Ultimate to the foreground.
+3. Presses Ctrl + P.
+4. Waits for the Purchase Bill / Purchase Entry window.
+5. Enters only the hardcoded header values:
+   - Invoice Date: 03/08/2026
+   - Credit: Enter
+   - P Purc.: Enter
+   - Supplier: CIPLA
+   - Supplier Bill Number: 24563
+   - Today's Date: system date in DD-MM-YYYY format
+6. Stops after header entry.
 
-Purchase Window Failed
+Safety:
 
-Do NOT enter dates.
+- Does not enter medicines.
+- Does not save.
+- Does not close the Purchase window.
+- Does not type username or password.
+- Only uses Ctrl + P and header-entry keyboard actions.
 
-Do NOT type username.
+Verification:
 
-Do NOT enter medicines.
+Ran:
 
-Only test Ctrl + P.
+python3 -m py_compile tests/test_header_live.py
+python3 tests/test_header_live.py
+
+Result:
+
+Syntax check passed.
+Live run failed safely in this environment with:
+
+Header Entry Failed: pyautogui unavailable: No module named 'pyautogui'
+
+Note:
+
+This is a live Windows/Pharma test. On this macOS environment, the actual live run is expected to fail gracefully if pyautogui/pywinauto or the Pharma window is unavailable.
