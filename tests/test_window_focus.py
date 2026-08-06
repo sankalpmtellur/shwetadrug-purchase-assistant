@@ -7,16 +7,16 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.automation.config import WINDOW_TITLE
-from app.automation.window_manager import (
-    bring_pharma_to_front,
-    get_window_title,
-    is_pharma_running,
-    maximize_pharma_window,
-)
+from app.tools.window_detector import find_window_by_title, focus_window
 
 
 def focus_pharma_window():
-    window_found = is_pharma_running(WINDOW_TITLE)
+    print("Configured WINDOW_TITLE:")
+    print(WINDOW_TITLE)
+    print()
+
+    window = find_window_by_title(WINDOW_TITLE, print_debug=True)
+    window_found = window is not None
     print(f"Window Found: {window_found}")
 
     if not window_found:
@@ -24,10 +24,8 @@ def focus_pharma_window():
         print("Window Title: Not Found")
         return False
 
-    focused = bring_pharma_to_front(WINDOW_TITLE)
-    maximized = maximize_pharma_window(WINDOW_TITLE)
-    focused_successfully = focused and maximized
-    window_title = get_window_title(WINDOW_TITLE) or "Unknown"
+    focused_successfully = focus_window(window)
+    window_title = window.window_text() or "Unknown"
 
     print(f"Window Focused Successfully: {focused_successfully}")
     print(f"Window Title: {window_title}")
