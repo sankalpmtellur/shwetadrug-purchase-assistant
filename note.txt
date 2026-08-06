@@ -1,150 +1,99 @@
-TASK - Fix Header Navigation & Dynamic Supplier Extraction
+# BUG - Import Completes Immediately (Imported: 0, Failed: 0)
 
-The first real-world test exposed a few issues. Please implement the following changes only.
+## Problem
 
-1. Supplier Extraction (IMPORTANT)
+After:
+- Paste structured text
+- Preview (Validation successful)
+- Start Import
 
-Currently the parser hardcodes:
+The application immediately shows:
 
-Ajit Agencies
+Import Completed
+Imported: 0
+Failed: 0
+Duration: 0s
 
-Remove this completely.
+No automation starts.
 
-Instead, extract the supplier/company name dynamically from the uploaded invoice.
+## Investigate
 
-Examples:
+Trace the complete execution flow:
 
-Narnkar & Co.
-ABC Pharma
-Torrent Pharmaceuticals
-Sun Pharma
+Structured Text
+    ↓
+StructuredTextParser.parse()
+    ↓
+Invoice object
+    ↓
+Preview
+    ↓
+Start Import
+    ↓
+PurchaseAutomation.run(invoice)
+    ↓
+fill_header()
+    ↓
+fill_items()
 
-The supplier must always come from the invoice.
+Determine exactly where execution stops.
 
-Never hardcode it.
+## Verify
 
-2. Header Navigation Fix
+1. How many items exist in invoice.items immediately after parsing?
+2. How many items are passed into PurchaseAutomation.run()?
+3. Is fill_header() being called?
+4. Is fill_items() being called?
+5. Is there any early return when invoice.items is empty?
+6. Is Start Import accidentally creating a new empty Invoice instead of using the parsed Invoice?
 
-Current automation is incorrect.
+## Add Temporary Logging
 
-Current flow:
+Print logs like:
 
-Invoice Date
-↓
+Invoice parsed: X items
+Invoice passed to automation: X items
+Automation started
+Filling header...
+Filling items...
+Entering item 1
+Entering item 2
+...
+Automation finished
 
-Enter ×5
+## Expected
 
-↓
+For the provided invoice:
 
-Supplier
+Invoice parsed: 6 items
+Invoice passed to automation: 6 items
+Automation started
+Header entered
+Entering item 1
+Entering item 2
+...
+Entering item 6
+Automation complete
 
-This is wrong.
+## Goal
 
-Correct flow:
+Identify and fix the reason why automation exits immediately with:
 
-Invoice Date
-↓
-
-Enter ×4
-
-↓
-
-Supplier
-
-↓
-
-Bill Number
-
-↓
-
-Bill Date
-
-One extra Enter is causing the supplier name to be typed into the Supplier Bill No field.
-
-Reduce the Enter presses after the invoice date from 5 to 4.
-
-3. Invoice Fields
-
-Ensure these are extracted dynamically from every invoice:
-
-Supplier Name
-Invoice Number
-Invoice Date
-
-Do not hardcode any of these.
-
-4. Medicine Entry Flow
-
-The correct navigation is:
-
-SI No (auto)
-
-↓
-
-Enter
-
-↓
-
-Medicine Name
-
-↓
-
-Batch
-
-↓
-
-Expiry
-
-↓
-
-Quantity
-
-↓
-
-Free
-
-↓
-
-Purchase Rate
-
-↓
-
-MRP
-
-↓
-
-Sale Rate
-
-↓
-
-Discount
-
-↓
-
-Enter ×5
-
-↓
-
-Next SI No
-
-Ensure the automation starts each medicine row by pressing one Enter from the auto-filled SI No field before typing the medicine name.
-
-5. Do NOT Change
+Imported: 0
+Failed: 0
 
 Do not modify:
+- GUI
+- Parser format
+- Validation
+- Preview
+- Automation workflow
 
-Parser architecture
-Validation
-Preview
-Simulation mode
-GUI
-Automation timing
-Save workflow
+Only fix the underlying cause and remove the premature exit.
 
-Only fix the issues mentioned above.
+## Deliverables
 
-After implementing, provide:
-
-Files modified
-What changed
-Confirmation that the header navigation now follows the corrected workflow exactly.
+- Files modified
+- Root cause
+- What was fixed
+- Confirmation that automation now processes all parsed items correctly.

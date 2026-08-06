@@ -12,6 +12,7 @@ HEADER_FIELDS = {
 
 ITEM_FIELDS = {
     "name": "medicine_name",
+    "item description": "medicine_name",
     "medicine": "medicine_name",
     "medicine name": "medicine_name",
     "batch": "batch_number",
@@ -30,6 +31,15 @@ ITEM_FIELDS = {
     "discount %": "discount_percent",
 }
 
+MEDICINES_SECTION_HEADINGS = {
+    "medicines",
+    "medicine",
+    "items",
+    "item details",
+    "medicine details",
+    "medicine list",
+}
+
 
 def parse_invoice_text(text):
     header_data = {
@@ -41,10 +51,18 @@ def parse_invoice_text(text):
     current_item = None
     in_medicines_section = False
     pending_header_field = None
+    pending_item_field = None
 
     for raw_line in text.splitlines():
         line = raw_line.strip()
         if not line:
+            continue
+
+        if pending_item_field and ":" not in line:
+            if current_item is None:
+                current_item = {}
+            current_item[pending_item_field] = line
+            pending_item_field = None
             continue
 
         if pending_header_field and ":" not in line:
@@ -52,15 +70,17 @@ def parse_invoice_text(text):
             pending_header_field = None
             continue
 
-        if normalize_key(line.rstrip(":")) == "medicines":
+        if is_medicines_heading(line):
             in_medicines_section = True
             pending_header_field = None
+            pending_item_field = None
             continue
 
-        if in_medicines_section and is_item_number(line):
-            if current_item:
+        if in_medicines_section and is_item_start(line):
+            if current_item is not None:
                 item_blocks.append(current_item)
             current_item = {}
+            pending_item_field = None
             continue
 
         if ":" not in line:
@@ -75,7 +95,10 @@ def parse_invoice_text(text):
                 current_item = {}
             field_name = ITEM_FIELDS.get(normalized_key)
             if field_name:
-                current_item[field_name] = cleaned_value
+                if cleaned_value:
+                    current_item[field_name] = cleaned_value
+                else:
+                    pending_item_field = field_name
             continue
 
         field_name = HEADER_FIELDS.get(normalized_key)
@@ -85,7 +108,7 @@ def parse_invoice_text(text):
             else:
                 pending_header_field = field_name
 
-    if current_item:
+    if current_item is not None:
         item_blocks.append(current_item)
 
     invoice = Invoice(
@@ -100,6 +123,7 @@ def parse_invoice_text(text):
         invoice.items.append(item)
 
     validate_invoice(invoice)
+    print(f"Invoice parsed: {len(invoice.items)} items")
     return invoice
 
 
@@ -118,8 +142,28 @@ def build_invoice_item(item_data):
 
 
 def is_item_number(line):
-    value = line.rstrip(".").strip()
+    value = line.rstrip(".):").strip()
     return value.isdigit()
+
+
+def is_item_start(line):
+    normalized = normalize_key(line.rstrip(":"))
+    if is_item_number(line):
+        return True
+
+    if normalized.startswith("medicine "):
+        suffix = normalized.removeprefix("medicine ").strip()
+        return is_item_number(suffix)
+
+    if normalized.startswith("item "):
+        suffix = normalized.removeprefix("item ").strip()
+        return is_item_number(suffix)
+
+    return False
+
+
+def is_medicines_heading(line):
+    return normalize_key(line.rstrip(":")) in MEDICINES_SECTION_HEADINGS
 
 
 def normalize_key(value):

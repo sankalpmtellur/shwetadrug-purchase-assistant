@@ -116,6 +116,7 @@ class PurchaseAutomation:
         return cursor_ready
 
     def fill_header(self, invoice):
+        print("Filling header...")
         self._log_action("fill_header", True, "Starting")
 
         invoice_date = format_invoice_date(invoice.invoice_date)
@@ -146,6 +147,7 @@ class PurchaseAutomation:
         return success
 
     def fill_items(self, invoice):
+        print("Filling items...")
         total = len(invoice.items)
         successful_items = 0
         failed_items = []
@@ -159,6 +161,7 @@ class PurchaseAutomation:
             if total:
                 progress_value = 50 + int((index / total) * 35)
             self._set_progress(f"Medicine {index} / {total}", progress_value)
+            print(f"Entering item {index}")
             self._log_action(
                 f"Medicine {index} / {total}",
                 True,
@@ -228,6 +231,8 @@ class PurchaseAutomation:
         start_time = datetime.now()
         self.import_logger = get_import_logger(start_time)
         self._set_progress("Preparing...", 0)
+        print(f"Invoice passed to automation: {len(invoice.items)} items")
+        print("Automation started")
         self._log_action("run", True, "Starting import")
 
         import_result = ImportResult(
@@ -272,6 +277,7 @@ class PurchaseAutomation:
         saved_successfully = self.save_purchase()
         summary = self._build_summary(invoice, import_result, start_time, saved_successfully)
         self._set_progress("Completed", 100)
+        print("Automation complete")
         return summary
 
     def verify_date_field_ready(self):

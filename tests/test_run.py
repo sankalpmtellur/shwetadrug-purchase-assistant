@@ -11,6 +11,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.automation.automation_engine import PurchaseAutomation
 from app.core.models import ImportResult, ImportSummary, Invoice, InvoiceItem
+from app.core.text_parser import parse_invoice_text
 
 
 def make_invoice():
@@ -102,9 +103,80 @@ def test_import_summary_generation():
     assert summary.failed_medicine_names == ["Dolo 650"]
 
 
+def test_run_receives_all_parsed_text_items():
+    invoice = parse_invoice_text(
+        """
+Supplier: ABC Pharma
+Invoice Number: INV-006
+Invoice Date: 03-08-2026
+
+Medicines:
+
+Medicine 1
+Item Description: A
+Batch: B001
+Expiry: 01-02-2028
+Quantity: 1
+MRP: 10
+
+Medicine 2
+Item Description: B
+Batch: B002
+Expiry: 01-02-2028
+Quantity: 1
+MRP: 10
+
+Medicine 3
+Item Description: C
+Batch: B003
+Expiry: 01-02-2028
+Quantity: 1
+MRP: 10
+
+Medicine 4
+Item Description: D
+Batch: B004
+Expiry: 01-02-2028
+Quantity: 1
+MRP: 10
+
+Medicine 5
+Item Description: E
+Batch: B005
+Expiry: 01-02-2028
+Quantity: 1
+MRP: 10
+
+Medicine 6
+Item Description: F
+Batch: B006
+Expiry: 01-02-2028
+Quantity: 1
+MRP: 10
+"""
+    )
+    automation = PurchaseAutomation()
+    import_result = ImportResult(total=6, success=6, failed=0, failed_items=[])
+
+    with patch.object(automation, "login", return_value=True), \
+        patch.object(automation, "open_purchase_window", return_value=True), \
+        patch.object(automation, "fill_header", return_value=True) as fill_header, \
+        patch.object(automation, "fill_items", return_value=import_result) as fill_items, \
+        patch.object(automation, "save_purchase", return_value=True), \
+        patch("app.automation.automation_engine.get_import_logger"):
+        summary = automation.run(invoice)
+
+    assert len(invoice.items) == 6
+    fill_header.assert_called_once_with(invoice)
+    fill_items.assert_called_once_with(invoice)
+    assert summary.total_medicines == 6
+    assert summary.imported_successfully == 6
+
+
 if __name__ == "__main__":
     test_save_purchase_success_path()
     test_save_purchase_failure_path()
     test_run_complete_success_workflow()
     test_run_failure_summary_when_login_fails()
     test_import_summary_generation()
+    test_run_receives_all_parsed_text_items()
