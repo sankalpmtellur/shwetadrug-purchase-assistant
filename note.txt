@@ -1,68 +1,55 @@
-TASK COMPLETED - Fix Live Header Entry Flow
+TASK COMPLETED - Live One Medicine Entry Test
 
-Updated:
+Created:
 
-tests/test_header_live.py
+tests/test_medicine_live.py
 
-Changes made:
+What it does:
 
-1. Invoice Date
+1. Detects Pharma Ultimate using the shared detector logic from app/tools/window_detector.py.
+2. Brings Pharma Ultimate to the foreground.
+3. Presses Ctrl + P.
+4. Waits for the Purchase Bill / Purchase Entry window.
+5. Reuses the already verified header entry logic from tests/test_header_live.py.
+6. Enters exactly one medicine:
+   - Item Description: DOLO 650 TAB
+   - Batch: ABCD123
+   - Expiry: 01.10.27
+   - Quantity: 10
+   - Free: blank, Enter only
+   - Purchase Rate: 12.50
+   - MRP: 15.00
+   - Sale Rate: 14.00
+   - Discount: 10
+7. Presses Enter through the remaining columns.
+8. Stops.
 
-Changed from:
+Safety:
 
-03/08/2026
+- Does not enter a second medicine row.
+- Does not save.
+- Does not close the Purchase window.
+- Does not modify production automation.
 
-to:
+Output:
 
-03-08-2026
+Medicine Entry Successful
 
-Format is now DD-MM-YYYY.
+or
 
-2. Navigation
-
-After entering the invoice date and pressing Enter, the script now presses Enter exactly five (5) more times to reach the Supplier field.
-
-Removed previous config-based supplier skip logic from this live test.
-
-3. Supplier
-
-Changed hardcoded supplier to:
-
-Ajit Agencies
-
-The live test types the supplier and presses Enter.
-
-No dropdown arrow logic was added.
-
-4. Supplier Bill Number
-
-Changed hardcoded bill number to:
-
-12345
-
-The script types it and presses Enter.
-
-5. Supplier Bill Date
-
-The script enters today's system date in DD-MM-YYYY format and presses Enter.
-
-6. Stop Point
-
-The script stops after Supplier Bill Date.
-
-It does not:
-
-- enter medicines
-- save
-- close the Purchase window
-- modify production automation
+Medicine Entry Failed
 
 Verification:
 
 Ran:
 
-python3 -m py_compile tests/test_header_live.py
+python3 -m py_compile tests/test_medicine_live.py
+python3 tests/test_medicine_live.py
 
 Result:
 
 Syntax check passed.
+Live run failed safely in this environment with:
+
+Header Entry Failed: pyautogui unavailable: No module named 'pyautogui'
+Medicine Entry Failed
