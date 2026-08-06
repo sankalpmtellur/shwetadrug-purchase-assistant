@@ -15,7 +15,7 @@ from app.tools.window_detector import find_window_by_title, focus_window
 INVOICE_DATE = "03-08-2026"
 SUPPLIER_NAME = "Ajit Agencies"
 SUPPLIER_BILL_NUMBER = "12345"
-ENTERS_TO_SUPPLIER_FIELD = 5
+ENTERS_TO_SUPPLIER_FIELD = 4
 
 
 def get_pyautogui():
