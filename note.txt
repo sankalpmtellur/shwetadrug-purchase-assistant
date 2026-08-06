@@ -1,93 +1,159 @@
-TASK 10 - Structured Text Import
+TASK 12 - Connect GUI to Production Automation
 
 Goal
 
-Instead of reading CSV, the Purchase Assistant should accept structured text copied from ChatGPT.
-
-Do NOT build GUI yet.
-
---------------------------------------------------
-Create
-
-app/core/text_parser.py
+Make the Purchase Assistant functional.
 
 --------------------------------------------------
 
-Input
+When Preview is clicked
 
-A multiline text pasted by the employee.
+↓
 
-Example format:
+Parse the pasted ChatGPT output.
 
-Supplier:
-Ajit Agencies
+↓
 
-Invoice Number:
-12345
+Show the Invoice Preview.
 
-Invoice Date:
-03-08-2026
+(This already exists.)
 
-Medicines:
+--------------------------------------------------
 
-1.
-Name: Acenal P tablet
-Batch: 11111
-Expiry: 01-02-2028
-Quantity: 30
-Free: 0
-PRate: 100
-MRP: 150
-SRate: 200
-Discount: 10
+When Start Import is clicked
 
-2.
+↓
+
+Validate the parsed Invoice.
+
+↓
+
+If validation fails
+
+Show a dialog.
+
+Do not start automation.
+
+--------------------------------------------------
+
+If validation succeeds
+
+↓
+
+Pass the existing Invoice object directly into:
+
+PurchaseAutomation.run(invoice)
+
+Do NOT create a second parser.
+
+Do NOT reconstruct the invoice.
+
+Reuse the already parsed object.
+
+--------------------------------------------------
+
+During Import
+
+Update the Progress Panel.
+
+Example:
+
+Preparing...
+
+Opening Pharma...
+
+Logging In...
+
+Opening Purchase Window...
+
+Entering Header...
+
+Medicine 1 / 120
+
+Medicine 2 / 120
+
 ...
 
+Saving...
+
+Completed
+
 --------------------------------------------------
 
-Output
+Emergency Stop
 
-Convert the pasted text into the existing:
+Connect it to the existing automation.
+
+When pressed:
+
+Stop the automation safely.
+
+Update status.
+
+--------------------------------------------------
+
+Completion
+
+Show a dialog.
+
+Example:
+
+Import Completed
+
+Imported:
+
+118
+
+Failed:
+
+2
+
+Duration:
+
+2m 15s
+
+--------------------------------------------------
+
+Architecture
+
+GUI
+
+↓
+
+Text Parser
+
+↓
 
 Invoice
 
-InvoiceItem
+↓
 
-objects.
+Automation Engine
 
-Reuse existing models.
+↓
 
---------------------------------------------------
+Progress Updates
 
-Validation
+↓
 
-Reuse all existing validation.
+Summary
 
-Do not duplicate code.
+Do not duplicate any logic.
+
+Only connect the existing modules.
 
 --------------------------------------------------
 
 Testing
 
-Create:
+Run the GUI.
 
-tests/test_text_parser.py
+Paste sample ChatGPT output.
 
-Use sample text.
+Preview.
 
-Verify Invoice object is created correctly.
+Start Import.
 
---------------------------------------------------
+Verify progress updates correctly.
 
-Constraints
-
-Do NOT modify automation.
-
-Do NOT modify header logic.
-
-Do NOT modify medicine logic.
-
-Only replace the input source.
-
-The automation should not know whether the data came from CSV or ChatGPT.
+No UI redesign.
