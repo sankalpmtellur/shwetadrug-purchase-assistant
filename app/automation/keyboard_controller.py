@@ -18,6 +18,7 @@ def _run_keyboard_action(action, callback):
         import pyautogui
 
         callback(pyautogui)
+        time.sleep(config.KEYBOARD_ACTION_DELAY)
         _log_action(action, True)
         return True
     except Exception as error:

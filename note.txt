@@ -1,153 +1,137 @@
-TASK 4 - Build Automation Engine Foundation
+TASK 9 - Dry Run / Simulation Mode
 
 Goal
 
-Create the automation layer that will later control Pharma Ultimate.
+Before controlling Pharma Ultimate, simulate the complete import.
 
-DO NOT start entering medicines yet.
+No keyboard or mouse actions should occur.
 
-Only create a clean automation framework.
+----------------------------------------
 
---------------------------------------------------
 Create
 
-app/automation/
+app/simulator/
 
-Inside create:
+simulation_engine.py
 
-window_manager.py
+----------------------------------------
 
-keyboard_controller.py
+Implement:
 
-automation_engine.py
+simulate(invoice)
 
-config.py
+Output should resemble:
 
---------------------------------------------------
-1. window_manager.py
+----------------------------------------
 
-Functions:
+Launch Pharma
 
-- Check whether Pharma Ultimate is running.
-- Get window title.
-- Bring Pharma window to front.
-- Maximize if minimized.
-- Return success/failure.
+✓
 
-DO NOT hardcode coordinates.
+Login
 
---------------------------------------------------
-2. keyboard_controller.py
+✓
 
-Create reusable functions:
+Open Purchase Window
 
-write(text)
+✓
 
-press_enter()
+Header
 
-press_tab()
+Date : 03/08/2026
 
-press_ctrl_p()
+Supplier : CIPLA
 
-press_down()
+Bill No : 24563
 
-press_up()
+Today's Date : 06/08/2026
 
-press_escape()
+----------------------------------------
 
-hotkey(...)
+Medicine 1
 
-small_delay()
+Select Medicine
 
-medium_delay()
+DOLO 650 TAB
 
-large_delay()
+Batch
 
-Everything should use one centralized implementation.
+AB1234
 
---------------------------------------------------
-3. config.py
+Expiry
 
-Create configurable timings.
+01.10.27
 
-Example:
+Qty
 
-SHORT_DELAY
+10
 
-MEDIUM_DELAY
+Free
 
-LONG_DELAY
+0
 
-SEARCH_DELAY
+PRate
 
-DO NOT hardcode sleep values throughout the code.
+11.25
 
---------------------------------------------------
-4. automation_engine.py
+MRP
 
-Create class:
+15.00
 
-PurchaseAutomation
+SRate
 
-Methods only.
+14.00
 
-No implementation yet.
+Discount
 
-Methods:
+12
 
-launch_pharma()
+----------------------------------------
 
-login()
+Medicine 2
 
-open_purchase_window()
+...
 
-fill_header()
+----------------------------------------
 
-fill_items()
+Summary
 
-save_purchase()
+Supplier
 
-run()
+Invoice Number
 
-Every method should currently log:
+Medicines
 
-"Not Implemented"
+Estimated Keyboard Actions
 
-The goal is architecture.
+Estimated Time
 
---------------------------------------------------
-5. Logging
+----------------------------------------
 
-Every action should log:
+Validation
 
-Timestamp
+Show missing supplier.
 
-Action
+Show missing medicine.
 
-Success/Failure
+Show invalid batch.
 
---------------------------------------------------
-6. Test
+Show invalid quantity.
 
-Create:
+----------------------------------------
 
-tests/test_automation.py
+No keyboard.
 
-Verify:
+No mouse.
 
-Window detection works.
+No pyautogui.
 
-Keyboard helper functions execute without exceptions.
+Pure simulation.
 
-Automation object initializes.
+----------------------------------------
 
---------------------------------------------------
-Constraints
+Testing
 
-Do NOT automate purchase entry yet.
+tests/test_simulation.py
 
-Do NOT hardcode mouse positions.
-
-Do NOT hardcode keyboard sequence.
-
-Only build the reusable automation foundation.
+Verify printed workflow.

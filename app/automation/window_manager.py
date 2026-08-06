@@ -1,4 +1,6 @@
-from app.automation.config import PHARMA_WINDOW_TITLE
+import time
+
+from app.automation.config import POLL_INTERVAL, STARTUP_TIMEOUT, WINDOW_TITLE
 from app.tools.logger import get_logger
 
 
@@ -11,7 +13,7 @@ def log_action(action, success, message=""):
     logger.info("Action: %s | Result: %s%s", action, status, detail)
 
 
-def find_pharma_window(title=PHARMA_WINDOW_TITLE):
+def find_pharma_window(title=WINDOW_TITLE):
     try:
         import pygetwindow as gw
     except ImportError as error:
@@ -32,12 +34,12 @@ def find_pharma_window(title=PHARMA_WINDOW_TITLE):
     return None
 
 
-def is_pharma_running(title=PHARMA_WINDOW_TITLE):
+def is_pharma_running(title=WINDOW_TITLE):
     window = find_pharma_window(title)
     return window is not None
 
 
-def get_window_title(title=PHARMA_WINDOW_TITLE):
+def get_window_title(title=WINDOW_TITLE):
     window = find_pharma_window(title)
     if not window:
         return None
@@ -46,7 +48,7 @@ def get_window_title(title=PHARMA_WINDOW_TITLE):
     return window.title
 
 
-def bring_pharma_to_front(title=PHARMA_WINDOW_TITLE):
+def bring_pharma_to_front(title=WINDOW_TITLE):
     window = find_pharma_window(title)
     if not window:
         log_action("Bring Pharma window to front", False, "Window not found")
@@ -64,7 +66,7 @@ def bring_pharma_to_front(title=PHARMA_WINDOW_TITLE):
         return False
 
 
-def maximize_pharma_window(title=PHARMA_WINDOW_TITLE):
+def maximize_pharma_window(title=WINDOW_TITLE):
     window = find_pharma_window(title)
     if not window:
         log_action("Maximize Pharma window", False, "Window not found")
@@ -80,3 +82,35 @@ def maximize_pharma_window(title=PHARMA_WINDOW_TITLE):
     except Exception as error:
         log_action("Maximize Pharma window", False, str(error))
         return False
+
+
+def wait_for_window(window_title=WINDOW_TITLE, timeout=STARTUP_TIMEOUT, poll_interval=POLL_INTERVAL):
+    deadline = time.monotonic() + timeout
+
+    while time.monotonic() < deadline:
+        if find_pharma_window(window_title):
+            log_action("Wait for window", True, window_title)
+            return True
+
+        time.sleep(poll_interval)
+
+    log_action("Wait for window", False, f"Timed out waiting for '{window_title}'")
+    return False
+
+
+def wait_for_window_closed(
+    window_title=WINDOW_TITLE,
+    timeout=STARTUP_TIMEOUT,
+    poll_interval=POLL_INTERVAL,
+):
+    deadline = time.monotonic() + timeout
+
+    while time.monotonic() < deadline:
+        if not find_pharma_window(window_title):
+            log_action("Wait for window closed", True, window_title)
+            return True
+
+        time.sleep(poll_interval)
+
+    log_action("Wait for window closed", False, f"Timed out waiting for '{window_title}'")
+    return False
