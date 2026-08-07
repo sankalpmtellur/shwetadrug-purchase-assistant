@@ -1,73 +1,81 @@
-# BUG - All 6 Medicines Failed During Automation
+# BUG - Application Hangs Inside login()
 
-Current result:
+Current logs:
 
-Import Completed
-Imported: 0
-Failed: 6
-Duration: 0s
+Invoice parsed: 6 items
+[GUI] Start Import clicked
+[GUI] Invoice object received
+[GUI] Invoice has 6 items
+[GUI] Worker entered
+[GUI] Calling PurchaseAutomation.run()
+[AUTO] run() entered
+[AUTO] Invoice passed to automation: 6 items
+Logging in...
+[AUTO] login() entered
 
-This proves:
-
-- The parser successfully parsed 6 medicines.
-- The GUI passed the invoice correctly.
-- PurchaseAutomation.run() was executed.
-
-The failure now occurs during automation.
+No logs appear after this.
 
 ==================================================
 
-For each medicine, print the COMPLETE exception.
+The application is hanging inside login().
 
-Instead of only counting it as failed, log:
+Investigate login() completely.
 
-Medicine Name
-Exception Type
-Exception Message
-Full traceback
+Add logging before and after EVERY statement.
 
 Example:
 
---------------------------------
-Medicine: ESOGRESS L
-Exception:
-Traceback...
---------------------------------
+login() entered
 
-Do this for every failed medicine.
+Finding Pharma window...
+Window found
 
-==================================================
+Focusing window...
+Window focused
 
-Also print before every major automation step:
+Checking login screen...
+Login screen found
 
-Launching Pharma...
-Logging in...
-Opening Purchase Window...
-Entering Header...
-Entering Medicine 1...
-Selecting Medicine...
-Entering Batch...
-Entering Expiry...
-Entering Quantity...
-Entering Free...
-Entering Purchase Rate...
-Entering MRP...
-Entering Sale Rate...
-Entering Discount...
+Typing username...
+Username entered
 
-This will identify the exact statement that fails.
+Typing password...
+Password entered
+
+Pressing Enter...
+Login successful
+
+login() completed
 
 ==================================================
 
-Do NOT swallow exceptions.
+Also inspect for:
 
-Every exception must print the full traceback.
+- Infinite while loops
+- wait_until() without timeout
+- sleep() loops
+- Window detection waiting forever
+- focus_window() blocking
+- pywinauto.wait()
+- Any retry loop without a maximum retry count
+
+Every waiting loop must have a timeout and log each retry.
+
+==================================================
+
+Goal
+
+Find the exact statement inside login() where execution stops.
+
+Do not change automation behavior.
+
+Only identify and fix the blocking call.
 
 ==================================================
 
 Deliverables
 
 - Files modified
-- Full exception for the first failed medicine
+- Exact line where execution blocks
 - Root cause
 - Fix implemented

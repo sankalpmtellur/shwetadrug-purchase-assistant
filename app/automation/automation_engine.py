@@ -44,22 +44,32 @@ class PurchaseAutomation:
         print("[AUTO] launch_pharma() entered")
         self._log_action("launch_pharma", True, "Starting")
 
-        if is_pharma_running(config.WINDOW_TITLE):
+        print("[AUTO] Checking for existing Pharma window...")
+        pharma_running = is_pharma_running(config.WINDOW_TITLE)
+        print(f"[AUTO] Existing Pharma window found: {pharma_running}")
+        if pharma_running:
+            print("[AUTO] Focusing window...")
             brought_to_front = bring_pharma_to_front(config.WINDOW_TITLE)
+            print(f"[AUTO] Window focused: {brought_to_front}")
+            print("[AUTO] Maximizing window...")
             maximized = maximize_pharma_window(config.WINDOW_TITLE)
+            print(f"[AUTO] Window maximized: {maximized}")
             success = brought_to_front and maximized
             self._log_action("launch_pharma", success, "Existing window path")
             print(f"[AUTO] launch_pharma() returned {success}")
             return success
 
         try:
+            print(f"[AUTO] Starting Pharma executable: {config.PHARMA_EXE_PATH}")
             subprocess.Popen([config.PHARMA_EXE_PATH])
+            print("[AUTO] Pharma executable started")
             self._log_action("launch_pharma", True, f"Launched {config.PHARMA_EXE_PATH}")
         except Exception as error:
             self._log_action("launch_pharma", False, str(error))
             print("[AUTO] launch_pharma() returned False")
             return False
 
+        print("[AUTO] Waiting for Pharma window after launch...")
         window_found = wait_for_window(
             config.WINDOW_TITLE,
             timeout=config.STARTUP_TIMEOUT,
@@ -79,34 +89,55 @@ class PurchaseAutomation:
             print("[AUTO] login() returned False")
             return False
 
+        print("[AUTO] Checking login screen...")
         login_ready = wait_for_window(
             config.WINDOW_TITLE,
             timeout=config.LOGIN_TIMEOUT,
             poll_interval=config.POLL_INTERVAL,
         )
+        print(f"[AUTO] Login screen found: {login_ready}")
         if not login_ready:
             self._log_action("login", False, "Login window never appeared")
             print("[AUTO] login() returned False")
             return False
 
-        steps = [
-            keyboard_controller.write(config.USERNAME),
-            keyboard_controller.press_enter(),
-            keyboard_controller.write(config.PASSWORD),
-            keyboard_controller.press_enter(),
-        ]
+        print("[AUTO] Typing username...")
+        username_entered = keyboard_controller.write(config.USERNAME)
+        print(f"[AUTO] Username entered: {username_entered}")
 
-        if not all(steps):
+        print("[AUTO] Pressing Enter after username...")
+        username_submitted = keyboard_controller.press_enter()
+        print(f"[AUTO] Username Enter pressed: {username_submitted}")
+
+        print("[AUTO] Typing password...")
+        password_entered = keyboard_controller.write(config.PASSWORD)
+        print(f"[AUTO] Password entered: {password_entered}")
+
+        print("[AUTO] Pressing Enter after password...")
+        password_submitted = keyboard_controller.press_enter()
+        print(f"[AUTO] Password Enter pressed: {password_submitted}")
+
+        if not all(
+            [
+                username_entered,
+                username_submitted,
+                password_entered,
+                password_submitted,
+            ]
+        ):
             self._log_action("login", False, "Login key sequence failed")
             print("[AUTO] login() returned False")
             return False
 
+        print("[AUTO] Waiting for login success...")
         loaded = wait_for_window(
             config.WINDOW_TITLE,
             timeout=config.LOGIN_TIMEOUT,
             poll_interval=config.POLL_INTERVAL,
         )
+        print(f"[AUTO] Login successful: {loaded}")
         self._log_action("login", loaded, "Main application load")
+        print("[AUTO] login() completed")
         print(f"[AUTO] login() returned {loaded}")
         return loaded
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import time
 from unittest.mock import Mock, patch
 
 
@@ -8,7 +9,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.automation.automation_engine import PurchaseAutomation
-from app.automation.window_manager import wait_for_window
+from app.automation.window_manager import run_with_timeout, wait_for_window
 
 
 def test_launch_uses_existing_window_path():
@@ -67,6 +68,15 @@ def test_wait_for_window_success():
         assert wait_for_window("Pharma Ultimate", timeout=1, poll_interval=0.1) is True
 
 
+def test_window_operation_timeout_does_not_hang():
+    try:
+        run_with_timeout("Slow window call", lambda: time.sleep(0.05), timeout=0.01)
+    except TimeoutError as error:
+        assert "Slow window call Timed out" in str(error)
+    else:
+        raise AssertionError("Expected TimeoutError")
+
+
 if __name__ == "__main__":
     test_launch_uses_existing_window_path()
     test_launch_uses_executable_path_when_window_missing()
@@ -74,3 +84,4 @@ if __name__ == "__main__":
     test_login_timeout_path()
     test_wait_for_window_timeout()
     test_wait_for_window_success()
+    test_window_operation_timeout_does_not_hang()
