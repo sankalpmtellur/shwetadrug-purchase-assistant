@@ -181,23 +181,31 @@ class PurchaseAutomation:
 
         steps = []
 
-        self._log_action("Entering Date", True, invoice_date)
+        print("Entering Invoice Date...")
+        self._log_action("Entering Invoice Date", True, invoice_date)
         steps.append(keyboard_controller.write(invoice_date))
+        print("Entered Invoice Date")
 
-        self._log_action("Navigating to Supplier", True)
-        for _index in range(config.SUPPLIER_FIELD_TAB_COUNT):
-            steps.append(keyboard_controller.press_enter())
+        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_INVOICE_DATE))
 
-        self._log_action("Selecting Supplier", True, invoice.supplier_name)
+        print("Entering Supplier...")
+        self._log_action("Entering Supplier", True, invoice.supplier_name)
         steps.append(select_supplier(invoice.supplier_name))
+        print("Entered Supplier")
 
+        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_SUPPLIER))
+
+        print("Entering Bill Number...")
         self._log_action("Entering Bill Number", True, invoice.invoice_number)
         steps.append(keyboard_controller.write(invoice.invoice_number))
-        steps.append(keyboard_controller.press_enter())
+        print("Entered Bill Number")
+        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_BILL_NUMBER))
 
-        self._log_action("Entering Today's Date", True, today)
+        print("Entering Bill Date...")
+        self._log_action("Entering Bill Date", True, today)
         steps.append(keyboard_controller.write(today))
-        steps.append(keyboard_controller.press_enter())
+        print("Entered Bill Date")
+        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_BILL_DATE))
 
         success = all(steps)
         self._log_action("Header Complete", success)
@@ -371,53 +379,63 @@ class PurchaseAutomation:
         return True
 
     def _fill_single_item(self, item):
-        print("[AUTO] Moving from SI No to Medicine Name...")
+        print("Press Enter (SI No)")
         self._require_step(
             "Move from SI No to Medicine Name",
-            keyboard_controller.press_enter,
+            lambda: press_enters_with_debug(config.ITEM_ROW_START_ENTER_COUNT),
             item.medicine_name,
         )
 
-        print("[AUTO] Selecting Medicine...")
+        print("Entering Medicine Name...")
+        print("Selecting Medicine...")
         self._log_action("Selecting Medicine", True, item.medicine_name)
         self._require_step("Selecting Medicine", lambda: select_medicine(item.medicine_name), item.medicine_name)
+        print("Selected Medicine")
 
-        print("[AUTO] Entering Batch...")
+        print("Entering Batch...")
         self._require_step("Entering Batch", lambda: enter_if_not_blank(item.batch_number), item.medicine_name)
+        print("Entered Batch")
 
-        print("[AUTO] Entering Expiry...")
+        print("Entering Expiry...")
         self._require_step("Entering Expiry", lambda: enter_if_not_blank(item.expiry), item.medicine_name)
+        print("Entered Expiry")
 
-        print("[AUTO] Entering Quantity...")
+        print("Entering Quantity...")
         self._require_step("Entering Quantity", lambda: enter_if_not_blank(item.quantity), item.medicine_name)
+        print("Entered Quantity")
 
-        print("[AUTO] Entering Free...")
+        print("Entering Free...")
         self._require_step("Entering Free", lambda: enter_free_quantity(item.free), item.medicine_name)
+        print("Entered Free")
 
-        print("[AUTO] Entering Purchase Rate...")
+        print("Entering Purchase Rate...")
         self._require_step(
             "Entering Purchase Rate",
             lambda: enter_if_not_blank(item.purchase_rate),
             item.medicine_name,
         )
+        print("Entered Purchase Rate")
 
-        print("[AUTO] Entering MRP...")
+        print("Entering MRP...")
         self._require_step("Entering MRP", lambda: enter_if_not_blank(item.mrp), item.medicine_name)
+        print("Entered MRP")
 
-        print("[AUTO] Entering Sale Rate...")
+        print("Entering Sale Rate...")
         self._require_step("Entering Sale Rate", lambda: enter_if_not_blank(item.sale_rate), item.medicine_name)
+        print("Entered Sale Rate")
 
-        print("[AUTO] Entering Discount...")
+        print("Entering Discount...")
         self._require_step(
             "Entering Discount",
             lambda: enter_if_not_blank(item.discount_percent),
             item.medicine_name,
         )
+        print("Entered Discount")
 
-        print("[AUTO] Moving to next item row...")
+        print("Press Enter...")
         self._require_step(
             "Moving to next item row",
-            lambda: press_enters(config.REMAINING_ITEM_COLUMNS_ENTER_COUNT),
+            lambda: press_enters_with_debug(config.ITEM_ROW_COMPLETION_ENTER_COUNT),
             item.medicine_name,
         )
         self._require_step(
@@ -511,18 +529,23 @@ def select_supplier(name):
         logger.info("Action: Selecting Supplier | Result: Failure | Supplier name is empty")
         return False
 
+    print("Typing Supplier...")
     for character in supplier_name:
         if not keyboard_controller.write(character):
             logger.info("Action: Selecting Supplier | Result: Failure | Character entry failed")
             return False
         time.sleep(config.SEARCH_DELAY)
+    print("Typed Supplier")
 
     if config.SUPPLIER_DROPDOWN_PRESS_DOWN:
+        print("Press Down (Supplier)")
         if not keyboard_controller.press_down():
             logger.info("Action: Selecting Supplier | Result: Failure | Dropdown navigation failed")
             return False
 
+    print("Press Enter")
     success = keyboard_controller.press_enter()
+    print(f"Pressed Enter: {success}")
     status = "Success" if success else "Failure"
     logger.info("Action: Selecting Supplier | Result: %s | %s", status, supplier_name)
     return success
@@ -537,16 +560,20 @@ def select_medicine(name):
         return False
 
     typed_text = ""
+    print("Typing Medicine Name...")
     for character in medicine_name:
         typed_text += character
         if not keyboard_controller.write(character):
             logger.info("Action: Selecting Medicine | Result: Failure | %s", typed_text)
             return False
         time.sleep(config.SEARCH_DELAY)
+    print("Typed Medicine Name")
 
     for retry_index in range(config.MEDICINE_SELECTION_RETRIES):
         if is_medicine_highlighted(medicine_name):
+            print("Press Enter")
             success = keyboard_controller.press_enter()
+            print(f"Pressed Enter: {success}")
             status = "Success" if success else "Failure"
             logger.info("Action: Selecting Medicine | Result: %s | %s", status, medicine_name)
             return success
@@ -557,7 +584,9 @@ def select_medicine(name):
                 return False
 
             if is_medicine_highlighted(medicine_name):
+                print("Press Enter")
                 success = keyboard_controller.press_enter()
+                print(f"Pressed Enter: {success}")
                 status = "Success" if success else "Failure"
                 logger.info("Action: Selecting Medicine | Result: %s | %s", status, medicine_name)
                 return success
@@ -581,19 +610,34 @@ def enter_if_not_blank(value):
     text = format_entry_value(value)
     if text and not keyboard_controller.write(text):
         return False
-    return keyboard_controller.press_enter()
+    print("Press Enter")
+    success = keyboard_controller.press_enter()
+    print(f"Pressed Enter: {success}")
+    return success
 
 
 def enter_free_quantity(value):
     if numeric_greater_than_zero(value):
         return enter_if_not_blank(value)
-    return keyboard_controller.press_enter()
+    print("Press Enter")
+    success = keyboard_controller.press_enter()
+    print(f"Pressed Enter: {success}")
+    return success
 
 
 def press_enters(count):
     for _index in range(count):
         if not keyboard_controller.press_enter():
             return False
+    return True
+
+
+def press_enters_with_debug(count):
+    for _index in range(count):
+        print("Press Enter")
+        if not keyboard_controller.press_enter():
+            return False
+        print("Pressed Enter")
     return True
 
 

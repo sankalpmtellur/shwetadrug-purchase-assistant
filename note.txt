@@ -1,81 +1,111 @@
-# BUG - Application Hangs Inside login()
+# TASK - Fix Pharma Ultimate Keyboard Navigation
 
-Current logs:
+Great progress.
 
-Invoice parsed: 6 items
-[GUI] Start Import clicked
-[GUI] Invoice object received
-[GUI] Invoice has 6 items
-[GUI] Worker entered
-[GUI] Calling PurchaseAutomation.run()
-[AUTO] run() entered
-[AUTO] Invoice passed to automation: 6 items
-Logging in...
-[AUTO] login() entered
+The automation now:
 
-No logs appear after this.
+- Launches Pharma Ultimate
+- Logs in
+- Opens the Purchase window (Ctrl + P)
+- Starts entering data
+
+However, almost every field is entered into the wrong place.
+
+Observed issues:
+
+- Supplier name is incorrect or entered into the wrong field.
+- Invoice date is incorrect or entered into the wrong field.
+- Invoice number is incorrect or entered into the wrong field.
+- Medicine names are entered into the wrong field.
+- Batch numbers are shifted.
+- Expiry dates are shifted.
+- Quantity, rates, discount etc. are all misaligned.
+
+This indicates that the parser is working, but the keyboard navigation does not match the actual Pharma Ultimate UI.
 
 ==================================================
 
-The application is hanging inside login().
+Do NOT change:
 
-Investigate login() completely.
+- Parser
+- GUI
+- Validation
+- Import flow
 
-Add logging before and after EVERY statement.
+Only fix the keyboard navigation.
+
+==================================================
+
+For EVERY field, add debug prints like:
+
+Entering Invoice Date...
+Entered Invoice Date
+
+Press Enter
+
+Entering Supplier...
+Entered Supplier
+
+Press Enter
+
+Entering Bill Number...
+Entered Bill Number
+
+...
+
+For every medicine:
+
+Press Enter (SI No)
+
+Entering Medicine Name...
+
+Selecting Medicine...
+
+Entering Batch...
+
+Entering Expiry...
+
+Entering Quantity...
+
+Entering Free...
+
+Entering Purchase Rate...
+
+Entering MRP...
+
+Entering Sale Rate...
+
+Entering Discount...
+
+Press Enter...
+
+==================================================
+
+Also make ALL keyboard delays configurable.
 
 Example:
 
-login() entered
+KEY_DELAY = 0.20
+FIELD_DELAY = 0.30
+SEARCH_DELAY = 0.80
 
-Finding Pharma window...
-Window found
-
-Focusing window...
-Window focused
-
-Checking login screen...
-Login screen found
-
-Typing username...
-Username entered
-
-Typing password...
-Password entered
-
-Pressing Enter...
-Login successful
-
-login() completed
+These should be editable from config.py.
 
 ==================================================
 
-Also inspect for:
+IMPORTANT
 
-- Infinite while loops
-- wait_until() without timeout
-- sleep() loops
-- Window detection waiting forever
-- focus_window() blocking
-- pywinauto.wait()
-- Any retry loop without a maximum retry count
+Do not assume the field positions.
 
-Every waiting loop must have a timeout and log each retry.
+The navigation should exactly match the actual Pharma Ultimate workflow.
 
-==================================================
-
-Goal
-
-Find the exact statement inside login() where execution stops.
-
-Do not change automation behavior.
-
-Only identify and fix the blocking call.
+We will fine-tune it by comparing the automation with real manual entry.
 
 ==================================================
 
 Deliverables
 
 - Files modified
-- Exact line where execution blocks
-- Root cause
-- Fix implemented
+- Navigation changes
+- Delay changes
+- Confirmation that every field now follows the intended workflow.

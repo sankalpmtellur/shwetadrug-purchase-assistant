@@ -14,12 +14,12 @@ def _log_action(action, success, message=""):
     logger.info("Action: %s | Result: %s%s", action, status, detail)
 
 
-def _run_keyboard_action(action, callback):
+def _run_keyboard_action(action, callback, delay=None):
     try:
         import pyautogui
 
         callback(pyautogui)
-        time.sleep(config.KEYBOARD_ACTION_DELAY)
+        time.sleep(config.FIELD_DELAY if delay is None else delay)
         _log_action(action, True)
         return True
     except Exception as error:
@@ -31,7 +31,8 @@ def _run_keyboard_action(action, callback):
 def write(text):
     return _run_keyboard_action(
         "Write text",
-        lambda pyautogui: pyautogui.write(str(text), interval=0),
+        lambda pyautogui: pyautogui.write(str(text), interval=config.KEY_DELAY),
+        delay=config.FIELD_DELAY,
     )
 
 
@@ -63,6 +64,7 @@ def hotkey(*keys):
     return _run_keyboard_action(
         f"Hotkey {'+'.join(keys)}",
         lambda pyautogui: pyautogui.hotkey(*keys),
+        delay=config.FIELD_DELAY,
     )
 
 
@@ -82,6 +84,7 @@ def _press(key):
     return _run_keyboard_action(
         f"Press {key}",
         lambda pyautogui: pyautogui.press(key),
+        delay=config.KEY_DELAY,
     )
 
 
