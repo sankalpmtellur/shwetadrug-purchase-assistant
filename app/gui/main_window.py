@@ -4,7 +4,7 @@ import traceback
 from tkinter import messagebox, ttk
 
 from app.automation.automation_engine import PurchaseAutomation
-from app.core.text_parser import parse_invoice_text
+from app.core.parser_selector import PARSER_CHOICES, STRUCTURED_TEXT, parse_invoice_input
 from app.gui.preview_panel import PreviewPanel
 from app.gui.progress_panel import ProgressPanel
 
@@ -16,6 +16,7 @@ class PurchaseAssistantWindow(tk.Tk):
         self.geometry("1000x700")
         self.minsize(900, 600)
         self.current_invoice = None
+        self.parser_var = tk.StringVar(value=STRUCTURED_TEXT)
         self.is_import_running = False
         self.automation = PurchaseAutomation(progress_callback=self.handle_progress)
 
@@ -65,6 +66,15 @@ class PurchaseAssistantWindow(tk.Tk):
             sticky="w",
             pady=(0, 12),
         )
+
+        parser_selector = ttk.Combobox(
+            input_panel,
+            textvariable=self.parser_var,
+            values=PARSER_CHOICES,
+            state="readonly",
+            width=18,
+        )
+        parser_selector.grid(row=0, column=0, sticky="e", pady=(0, 12))
 
         self.input_text = tk.Text(
             input_panel,
@@ -125,7 +135,7 @@ class PurchaseAssistantWindow(tk.Tk):
             messagebox.showinfo("Preview", "Paste structured text before previewing.")
             return
 
-        self.current_invoice = parse_invoice_text(pasted_text)
+        self.current_invoice = parse_invoice_input(pasted_text, self.parser_var.get())
         self.preview_panel.display_invoice(self.current_invoice)
         self.progress_panel.set_progress(0)
         self.progress_panel.set_status("Preview Ready")

@@ -1,66 +1,35 @@
-# BUG - Header Navigation Off by One Field
+TASK - Add JSON Input Support
 
-The latest test identified the first incorrect field.
+Current:
+Structured Text → Parser → Invoice Object
 
-Current behavior:
+New:
+JSON → Parser → Invoice Object
 
-1. Invoice Date ✅ Correct
-2. Cr Credit ✅ Correct
-3. P Purc. ✅ Correct
-4. SR No: P ✅ Correct
-5. Received ❌ Incorrect
+Requirements:
 
-The "Received" field is already pre-filled with its default value.
+1. Create a JSON parser that converts a JSON invoice into the existing Invoice object.
+2. Do not modify the automation engine.
+3. Do not modify the GUI workflow.
+4. Keep the structured text parser working.
+5. Add a parser selector:
+   - Structured Text
+   - JSON
+6. Both parsers must return the same Invoice object.
+7. Validation and automation should remain unchanged.
 
-The automation is typing the Supplier name into the "Received" field instead of the Supplier field.
+Goal:
 
-As a result:
+Automation should be completely independent of the input format.
 
-Received  ← Supplier name (wrong)
-Supplier  ← Invoice Number
-Supplier Bill No ← Supplier Bill Date
-...
+Future flow:
 
-Every remaining field shifts one field earlier.
-
-==================================================
-
-Required fix:
-
-After reaching the "Received" field:
-
-DO NOT type anything.
-
-Simply press Enter once to move to the Supplier field.
-
-Then continue:
-
-Supplier
-→ invoice.supplier
-Enter
-
-Supplier Bill No
-→ invoice.invoice_number
-Enter
-
-Supplier Bill Date
-→ today's date
-Enter
-
-==================================================
-
-Do not change any other navigation.
-
-Only correct the transition from "Received" to "Supplier".
-
-==================================================
-
-Deliverables:
-
-- Files modified
-- Exact change made
-- Confirmation that:
-  - Received remains unchanged.
-  - Supplier is entered in the Supplier field.
-  - Supplier Bill No is entered in the correct field.
-  - Supplier Bill Date is entered in the correct field.
+PDF
+   ↓
+ChatGPT API
+   ↓
+JSON
+   ↓
+Purchase Assistant
+   ↓
+Automation
