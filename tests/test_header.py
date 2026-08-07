@@ -75,7 +75,52 @@ def test_fill_header_sequence_and_supplier_helper():
         assert write.call_args_list[1].args[0] == "INV-1001"
         assert write.call_args_list[2].args[0] == "06-08-2026"
         supplier.assert_called_once_with("ABC Pharma")
-        assert enter.call_count == 6
+        assert enter.call_count == 7
+
+
+def test_fill_header_leaves_received_before_supplier_entry():
+    automation = PurchaseAutomation()
+    invoice = Invoice(
+        supplier_name="ABC",
+        invoice_number="INV-1001",
+        invoice_date="2026-08-06",
+    )
+    events = []
+
+    def record_write(value):
+        events.append(("write", value))
+        return True
+
+    def record_enter():
+        events.append(("enter", None))
+        return True
+
+    with patch("app.automation.automation_engine.keyboard_controller.write", side_effect=record_write), \
+        patch("app.automation.automation_engine.keyboard_controller.press_enter", side_effect=record_enter), \
+        patch("app.automation.automation_engine.time.sleep", return_value=None), \
+        patch("app.automation.automation_engine.format_today_date", return_value="06-08-2026"):
+        assert automation.fill_header(invoice) is True
+
+    assert events[:6] == [
+        ("write", "06-08-2026"),
+        ("enter", None),
+        ("enter", None),
+        ("enter", None),
+        ("enter", None),
+        ("enter", None),
+    ]
+    assert events[6:10] == [
+        ("write", "A"),
+        ("write", "B"),
+        ("write", "C"),
+        ("enter", None),
+    ]
+    assert events[10:] == [
+        ("write", "INV-1001"),
+        ("enter", None),
+        ("write", "06-08-2026"),
+        ("enter", None),
+    ]
 
 
 if __name__ == "__main__":
@@ -85,3 +130,4 @@ if __name__ == "__main__":
     test_open_purchase_window_success()
     test_select_supplier_types_progressively()
     test_fill_header_sequence_and_supplier_helper()
+    test_fill_header_leaves_received_before_supplier_entry()

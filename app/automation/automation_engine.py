@@ -185,9 +185,13 @@ class PurchaseAutomation:
         self._log_action("Entering Invoice Date", True, invoice_date)
         steps.append(keyboard_controller.write(invoice_date))
         print("Entered Invoice Date")
+        steps.append(press_enters_with_debug(1))
 
         for field_name in config.HEADER_ENTER_ONLY_FIELDS:
-            print(f"{field_name}...")
+            if field_name == "Received":
+                print("Received already pre-filled; leaving unchanged.")
+            else:
+                print(f"{field_name}...")
             steps.append(press_enters_with_debug(1))
 
         print("Entering Supplier...")

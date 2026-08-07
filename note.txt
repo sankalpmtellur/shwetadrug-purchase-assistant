@@ -1,149 +1,66 @@
-# TASK - Update Pharma Ultimate Navigation to Match Real Workflow
+# BUG - Header Navigation Off by One Field
 
-The previous navigation was based on assumptions. Replace it with the following EXACT workflow.
+The latest test identified the first incorrect field.
 
-==========================================
-HEADER
-==========================================
+Current behavior:
 
-1. Open Pharma Ultimate
-2. Press Ctrl + P
+1. Invoice Date ✅ Correct
+2. Cr Credit ✅ Correct
+3. P Purc. ✅ Correct
+4. SR No: P ✅ Correct
+5. Received ❌ Incorrect
 
-3. Invoice Date
-- Value: invoice.invoice_date
-- Format: DD-MM-YYYY
-- Press Enter
+The "Received" field is already pre-filled with its default value.
 
-4. Cr Credit
-- Press Enter
+The automation is typing the Supplier name into the "Received" field instead of the Supplier field.
 
-5. P Purc.
-- Press Enter
+As a result:
 
-6. SR No: P
-- Press Enter
+Received  ← Supplier name (wrong)
+Supplier  ← Invoice Number
+Supplier Bill No ← Supplier Bill Date
+...
 
-7. Received
-- Press Enter
+Every remaining field shifts one field earlier.
 
-8. Supplier
-- Value: invoice.supplier
-- Press Enter
+==================================================
 
-9. Supplier Bill No
-- Value: invoice.invoice_number
-- Press Enter
+Required fix:
 
-10. Supplier Bill Date
-- Value: Today's system date (NOT invoice date)
-- Format: DD-MM-YYYY
-- Press Enter
+After reaching the "Received" field:
 
-==========================================
-ITEM ENTRY
-==========================================
+DO NOT type anything.
 
-11. SI No
-- Auto-generated
-- Press Enter
+Simply press Enter once to move to the Supplier field.
 
-12. Item Description
-- Value: medicine.name
-- Press Enter
+Then continue:
 
-13. Batch No
-- Value: medicine.batch
-- Press Enter
+Supplier
+→ invoice.supplier
+Enter
 
-14. Expiry Date
-- Value: medicine.expiry
-- Required format:
-  DD-MM-YYYY
+Supplier Bill No
+→ invoice.invoice_number
+Enter
 
-Example:
-01-02-2028
-01-05-2028
-01-12-2027
+Supplier Bill Date
+→ today's date
+Enter
 
-- Press Enter
+==================================================
 
-15. Quantity
-- Value: medicine.quantity
-- Press Enter
+Do not change any other navigation.
 
-16. Free
-- Value: medicine.free
-- Press Enter
+Only correct the transition from "Received" to "Supplier".
 
-17. Purchase Rate
-- Value: medicine.purchase_rate (PTS)
-- Press Enter
+==================================================
 
-18. MRP
-- Value: medicine.mrp
-- Press Enter
-
-19. Sale Rate
-- Value: medicine.sale_rate (PTR)
-- Press Enter
-
-20. Discount
-- Value: medicine.discount
-- Press Enter
-
-21. Press Enter exactly 4 times.
-
-After the 4th Enter, Pharma Ultimate reaches the next SI No.
-
-Repeat again from Step 11.
-
-==========================================
-IMPORTANT
-==========================================
-
-Do not use any old navigation.
-
-Completely replace the existing keyboard flow with this workflow.
-
-Also ensure:
-
-- Invoice date comes from the invoice.
-- Supplier comes from the invoice.
-- Supplier Bill No comes from the invoice.
-- Supplier Bill Date uses today's system date.
-- Expiry format is DD-MM-YYYY.
-- Purchase Rate = PTS.
-- Sale Rate = PTR.
-
-==========================================
-DEBUG LOGGING
-==========================================
-
-Before every field print:
-
-Entering Invoice Date...
-Entering Supplier...
-Entering Supplier Bill No...
-Entering Supplier Bill Date...
-
-Medicine 1
-
-Entering Item Description...
-Entering Batch...
-Entering Expiry...
-Entering Quantity...
-Entering Free...
-Entering Purchase Rate...
-Entering MRP...
-Entering Sale Rate...
-Entering Discount...
-
-Print "Press Enter" whenever Enter is pressed.
-
-==========================================
-DELIVERABLES
-==========================================
+Deliverables:
 
 - Files modified
-- Navigation updated
-- Confirmation that the workflow exactly matches the sequence above.
+- Exact change made
+- Confirmation that:
+  - Received remains unchanged.
+  - Supplier is entered in the Supplier field.
+  - Supplier Bill No is entered in the correct field.
+  - Supplier Bill Date is entered in the correct field.
