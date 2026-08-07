@@ -1,4 +1,5 @@
 import time
+import traceback
 
 from app.automation import config
 from app.tools.logger import get_logger
@@ -23,7 +24,8 @@ def _run_keyboard_action(action, callback):
         return True
     except Exception as error:
         _log_action(action, False, str(error))
-        return False
+        traceback.print_exc()
+        raise
 
 
 def write(text):

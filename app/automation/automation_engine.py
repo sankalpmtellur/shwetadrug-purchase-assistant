@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import time
 import traceback
 from datetime import date, datetime
@@ -14,6 +15,13 @@ from app.automation.window_manager import (
 )
 from app.core.models import ImportResult, ImportSummary
 from app.tools.logger import get_import_logger, get_logger
+
+
+class AutomationStepError(Exception):
+    def __init__(self, step_name, medicine_name):
+        super().__init__(f"{step_name} failed for medicine: {medicine_name}")
+        self.step_name = step_name
+        self.medicine_name = medicine_name
 
 
 class PurchaseAutomation:
@@ -63,6 +71,7 @@ class PurchaseAutomation:
 
     def login(self):
         print("[AUTO] login() entered")
+        print("Launching Pharma...")
         launch_success = self.launch_pharma()
         print(f"[AUTO] login() launch_pharma returned {launch_success}")
         if not launch_success:
@@ -179,19 +188,22 @@ class PurchaseAutomation:
             if total:
                 progress_value = 50 + int((index / total) * 35)
             self._set_progress(f"Medicine {index} / {total}", progress_value)
-            print(f"[AUTO] Item {index}")
+            print(f"[AUTO] Entering Medicine {index}...")
             self._log_action(
                 f"Medicine {index} / {total}",
                 True,
                 item.medicine_name,
             )
 
-            if not self._fill_single_item(item):
+            try:
+                self._fill_single_item(item)
+            except Exception as error:
                 failed_items.append(item)
+                self._print_medicine_exception(item, error)
                 self._log_action(
                     f"Medicine {index} / {total}",
                     False,
-                    item.medicine_name,
+                    f"{type(error).__name__}: {error}",
                 )
                 continue
 
@@ -279,7 +291,7 @@ class PurchaseAutomation:
 
             self._set_progress("Opening Pharma...", 10)
             self._set_progress("Logging In...", 20)
-            print("[AUTO] login()")
+            print("Logging in...")
             if not self.login():
                 self._log_action("run", False, "Login failed")
                 return self._build_summary(invoice, import_result, start_time, saved_successfully)
@@ -288,7 +300,7 @@ class PurchaseAutomation:
                 return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
             self._set_progress("Opening Purchase Window...", 35)
-            print("[AUTO] open_purchase_window()")
+            print("Opening Purchase Window...")
             if not self.open_purchase_window():
                 self._log_action("run", False, "Purchase window failed")
                 return self._build_summary(invoice, import_result, start_time, saved_successfully)
@@ -297,7 +309,7 @@ class PurchaseAutomation:
                 return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
             self._set_progress("Entering Header...", 50)
-            print("[AUTO] fill_header()")
+            print("Entering Header...")
             if not self.fill_header(invoice):
                 self._log_action("run", False, "Header entry failed")
                 return self._build_summary(invoice, import_result, start_time, saved_successfully)
@@ -328,29 +340,83 @@ class PurchaseAutomation:
         return True
 
     def _fill_single_item(self, item):
-        if not keyboard_controller.press_enter():
-            self._log_action("Move from SI No to Medicine Name", False, item.medicine_name)
-            return False
+        print("[AUTO] Moving from SI No to Medicine Name...")
+        self._require_step(
+            "Move from SI No to Medicine Name",
+            keyboard_controller.press_enter,
+            item.medicine_name,
+        )
 
+        print("[AUTO] Selecting Medicine...")
         self._log_action("Selecting Medicine", True, item.medicine_name)
-        if not select_medicine(item.medicine_name):
-            self._log_action("Selecting Medicine", False, item.medicine_name)
-            return False
+        self._require_step("Selecting Medicine", lambda: select_medicine(item.medicine_name), item.medicine_name)
 
-        steps = [
-            enter_if_not_blank(item.batch_number),
-            enter_if_not_blank(item.expiry),
-            enter_if_not_blank(item.quantity),
-            enter_free_quantity(item.free),
-            enter_if_not_blank(item.purchase_rate),
-            enter_if_not_blank(item.mrp),
-            enter_if_not_blank(item.sale_rate),
-            enter_if_not_blank(item.discount_percent),
-            press_enters(config.REMAINING_ITEM_COLUMNS_ENTER_COUNT),
-            self.verify_next_item_row_ready(),
-        ]
+        print("[AUTO] Entering Batch...")
+        self._require_step("Entering Batch", lambda: enter_if_not_blank(item.batch_number), item.medicine_name)
 
-        return all(steps)
+        print("[AUTO] Entering Expiry...")
+        self._require_step("Entering Expiry", lambda: enter_if_not_blank(item.expiry), item.medicine_name)
+
+        print("[AUTO] Entering Quantity...")
+        self._require_step("Entering Quantity", lambda: enter_if_not_blank(item.quantity), item.medicine_name)
+
+        print("[AUTO] Entering Free...")
+        self._require_step("Entering Free", lambda: enter_free_quantity(item.free), item.medicine_name)
+
+        print("[AUTO] Entering Purchase Rate...")
+        self._require_step(
+            "Entering Purchase Rate",
+            lambda: enter_if_not_blank(item.purchase_rate),
+            item.medicine_name,
+        )
+
+        print("[AUTO] Entering MRP...")
+        self._require_step("Entering MRP", lambda: enter_if_not_blank(item.mrp), item.medicine_name)
+
+        print("[AUTO] Entering Sale Rate...")
+        self._require_step("Entering Sale Rate", lambda: enter_if_not_blank(item.sale_rate), item.medicine_name)
+
+        print("[AUTO] Entering Discount...")
+        self._require_step(
+            "Entering Discount",
+            lambda: enter_if_not_blank(item.discount_percent),
+            item.medicine_name,
+        )
+
+        print("[AUTO] Moving to next item row...")
+        self._require_step(
+            "Moving to next item row",
+            lambda: press_enters(config.REMAINING_ITEM_COLUMNS_ENTER_COUNT),
+            item.medicine_name,
+        )
+        self._require_step(
+            "Verifying next item row",
+            self.verify_next_item_row_ready,
+            item.medicine_name,
+        )
+
+        return True
+
+    def _require_step(self, step_name, callback, medicine_name):
+        try:
+            success = callback()
+        except Exception as error:
+            raise AutomationStepError(step_name, medicine_name) from error
+
+        if not success:
+            self._log_action(step_name, False, medicine_name)
+            raise AutomationStepError(step_name, medicine_name)
+
+        return True
+
+    def _print_medicine_exception(self, item, error):
+        print("--------------------------------")
+        print(f"Medicine: {item.medicine_name}")
+        print(f"Exception Type: {type(error).__name__}")
+        print(f"Exception Message: {error}")
+        print("Exception:")
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stdout)
+        print("--------------------------------")
 
     def _log_not_implemented(self, action):
         self.logger.info("Action: %s | Result: Failure | Not Implemented", action)

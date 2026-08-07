@@ -1,136 +1,73 @@
-# BUG - Import Still Completes Immediately (Imported: 0, Failed: 0)
+# BUG - All 6 Medicines Failed During Automation
 
-The previous parser fix did not solve the issue.
-
-Behavior is still:
-
-- Paste structured text
-- Preview → Validation successful
-- Click Start Import
-- Immediately shows:
+Current result:
 
 Import Completed
 Imported: 0
-Failed: 0
+Failed: 6
 Duration: 0s
 
-No Pharma Ultimate window is focused.
-No keyboard input occurs.
-No automation starts.
+This proves:
+
+- The parser successfully parsed 6 medicines.
+- The GUI passed the invoice correctly.
+- PurchaseAutomation.run() was executed.
+
+The failure now occurs during automation.
 
 ==================================================
-DO NOT GUESS.
-TRACE THE ACTUAL EXECUTION.
-==================================================
 
-Add logging to EVERY major step.
+For each medicine, print the COMPLETE exception.
 
-GUI:
+Instead of only counting it as failed, log:
 
-Start Import clicked
-
-↓
-
-Parsed invoice object
-
-↓
-
-PurchaseAutomation.run()
-
-↓
-
-launch_pharma()
-
-↓
-
-login()
-
-↓
-
-open_purchase_window()
-
-↓
-
-fill_header()
-
-↓
-
-fill_items()
-
-↓
-
-save_purchase()
-
-Print before and after EVERY function.
+Medicine Name
+Exception Type
+Exception Message
+Full traceback
 
 Example:
 
-[GUI] Start Import clicked
-[GUI] Invoice object received
-[GUI] Invoice has X items
-[AUTO] run() entered
-[AUTO] launch_pharma()
-[AUTO] login()
-[AUTO] open_purchase_window()
-[AUTO] fill_header()
-[AUTO] fill_items()
-[AUTO] Item 1
-[AUTO] Item 2
-...
-[AUTO] Finished
+--------------------------------
+Medicine: ESOGRESS L
+Exception:
+Traceback...
+--------------------------------
+
+Do this for every failed medicine.
 
 ==================================================
-ALSO CHECK
-==================================================
 
-1. Is PurchaseAutomation.run() actually being called?
+Also print before every major automation step:
 
-2. Is it running in a background thread that exits immediately?
+Launching Pharma...
+Logging in...
+Opening Purchase Window...
+Entering Header...
+Entering Medicine 1...
+Selecting Medicine...
+Entering Batch...
+Entering Expiry...
+Entering Quantity...
+Entering Free...
+Entering Purchase Rate...
+Entering MRP...
+Entering Sale Rate...
+Entering Discount...
 
-3. Is an exception occurring inside the worker thread but being swallowed?
-
-4. Is run() returning before launch_pharma()?
-
-5. Wrap run() in:
-
-try:
-    ...
-except Exception:
-    import traceback
-    traceback.print_exc()
-    raise
-
-Do NOT silently ignore exceptions.
-
-6. Search the project for:
-
-return ImportSummary(
-imported=0,
-failed=0
-
-Find every place where this summary can be returned.
-
-Determine exactly which code path is producing it.
+This will identify the exact statement that fails.
 
 ==================================================
-GOAL
-==================================================
 
-Do not make assumptions.
+Do NOT swallow exceptions.
 
-Identify the EXACT line of code responsible for:
-
-Imported: 0
-Failed: 0
-
-Then fix only that issue.
+Every exception must print the full traceback.
 
 ==================================================
-DELIVERABLES
-==================================================
+
+Deliverables
 
 - Files modified
-- Exact root cause
-- Exact line/function responsible
+- Full exception for the first failed medicine
+- Root cause
 - Fix implemented
-- Confirmation that PurchaseAutomation.run() is actually executed and reaches launch_pharma().
