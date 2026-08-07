@@ -1,5 +1,4 @@
-def main():
-    print("Purchase Assistant Started")
+from app.gui.app import main
 
 
 if __name__ == "__main__":

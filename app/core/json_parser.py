@@ -45,7 +45,8 @@ ITEM_FIELDS = {
     "discount_percent": "discount_percent",
 }
 
-ITEM_LIST_KEYS = ("items", "medicines", "medicine_list", "medicine details")
+INVOICE_ROOT_KEYS = ("invoice", "purchase invoice", "purchase_invoice")
+ITEM_LIST_KEYS = ("items", "medicines", "medicine list", "medicine details")
 
 
 def parse_invoice_json(text):
@@ -61,6 +62,7 @@ def parse_invoice_json(text):
         invoice.validation_errors.append("JSON invoice must be an object.")
         return invoice
 
+    data = extract_invoice_object(data)
     header_data = extract_header_data(data)
     invoice = Invoice(
         supplier_name=header_data["supplier_name"],
@@ -76,6 +78,13 @@ def parse_invoice_json(text):
     validate_invoice(invoice)
     print(f"JSON invoice parsed: {len(invoice.items)} items")
     return invoice
+
+
+def extract_invoice_object(data):
+    for key, value in data.items():
+        if normalize_key(key) in INVOICE_ROOT_KEYS and isinstance(value, dict):
+            return value
+    return data
 
 
 def extract_header_data(data):

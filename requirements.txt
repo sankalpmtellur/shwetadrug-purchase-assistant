@@ -2,8 +2,3 @@ pyautogui
 pywinauto
 pygetwindow
 pillow
-keyboard
-mouse
-opencv-python
-pyperclip
-psutil

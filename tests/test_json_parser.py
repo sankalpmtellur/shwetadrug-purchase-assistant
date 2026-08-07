@@ -90,3 +90,38 @@ def test_parse_invoice_json_invalid_json_returns_validation_error():
     invoice = parse_invoice_json("{")
 
     assert "Invalid JSON:" in invoice.validation_errors[0]
+
+
+def test_parse_invoice_json_supports_nested_invoice_payload():
+    invoice = parse_invoice_json(
+        """
+{
+  "invoice": {
+    "supplier_name": "Ajit Agencies",
+    "invoice_number": "12345",
+    "invoice_date": "03-08-2026",
+    "medicine_list": [
+      {
+        "medicine_name": "Acenal P tablet",
+        "batch_number": "11111",
+        "expiry_date": "01-02-2028",
+        "quantity": "30",
+        "free": "0",
+        "purchase_rate": "100",
+        "mrp": "150",
+        "sale_rate": "200",
+        "discount_percent": "10"
+      }
+    ]
+  }
+}
+"""
+    )
+
+    assert invoice.supplier_name == "Ajit Agencies"
+    assert invoice.invoice_number == "12345"
+    assert invoice.invoice_date == "03-08-2026"
+    assert len(invoice.items) == 1
+    assert invoice.items[0].medicine_name == "Acenal P tablet"
+    assert invoice.items[0].expiry == "01.02.28"
+    assert not invoice.validation_errors
