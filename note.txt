@@ -1,369 +1,114 @@
-# FINAL PRODUCTION AUDIT - PURCHASE ASSISTANT
-
-This is the FINAL audit before production.
-
-Do NOT implement new features.
-Do NOT redesign the UI.
-Do NOT change the workflow.
-
-Your only goal is to verify the entire project and make it production-ready.
-
-==================================================
-OBJECTIVE
-==================================================
-
-Review EVERY file.
-
-Review EVERY class.
-
-Review EVERY function.
-
-Review EVERY important line of code.
-
-Think like a senior software engineer performing the final production review.
-
-==================================================
-CHECKLIST
-==================================================
-
-1. Architecture
-- Remove dead code.
-- Remove duplicate logic.
-- Remove unused imports.
-- Remove unused variables.
-- Remove unreachable code.
-- Remove commented-out code.
-
-2. Correctness
-- Verify every parser.
-- Verify validation.
-- Verify automation.
-- Verify GUI.
-- Verify threading.
-- Verify logging.
-- Verify keyboard navigation.
-- Verify window detection.
-- Verify all delays.
-- Verify date conversions.
-- Verify decimal parsing.
-- Verify expiry conversion.
-
-3. Error Handling
-- No silent exceptions.
-- Every exception must have a meaningful message.
-- Every failure should be recoverable where possible.
-- No application crashes from invalid input.
-
-4. Reliability
-- Check race conditions.
-- Check thread safety.
-- Check infinite loops.
-- Check blocking calls.
-- Check timeout handling.
-- Check retry logic.
-- Check resource cleanup.
-
-5. Security
-- No dangerous eval/exec.
-- No unsafe file handling.
-- No path traversal issues.
-- No hardcoded secrets.
-- No credentials committed in code.
-- No unnecessary permissions.
-
-6. Performance
-- Remove unnecessary sleeps.
-- Remove duplicate parsing.
-- Remove unnecessary object creation.
-- Remove inefficient loops.
-- Verify startup time.
-- Verify import speed.
-
-7. Maintainability
-- Consistent naming.
-- Consistent formatting.
-- Small functions.
-- Clear comments where required.
-- Remove obsolete TODOs.
-
-8. Configuration
-- Ensure every configurable value lives in config.py.
-- No magic numbers.
-- No duplicated constants.
-
-9. Tests
-- Verify all tests.
-- Check coverage of critical paths.
-- Add missing tests if required.
-
-10. Production Readiness
-- Verify the project can be cloned and run on a fresh Windows machine.
-- Verify requirements.txt is complete.
-- Verify README setup steps are correct.
-- Verify no local machine paths remain.
-- Verify relative paths are used where appropriate.
-
-==================================================
-IMPORTANT
-==================================================
-
-Do NOT change behaviour unless a genuine bug is found.
-
-If code is already correct,
-leave it unchanged.
-
-Avoid unnecessary refactoring.
-
-Only make changes that genuinely improve:
-
-- correctness
-- reliability
-- maintainability
-- production readiness
-
-==================================================
-OUTPUT
-==================================================
-
-Provide:
-
-1. Overall project rating (/10)
-2. Files inspected
-3. Files modified
-4. Every issue found
-5. Every fix made
-6. Any remaining risks
-7. Production readiness assessment
-
-Finally answer only one question:
-
-"Would you deploy this on a real office PC for daily employee use?"
-
-Answer only:
-YES
-or
-NO
-
-If NO,
-list exactly what must still be fixed.
-
-If YES,
-briefly explain why.
-
-==================================================
-PRODUCTION AUDIT REPORT
-==================================================
-
-Audit date: 2026-08-07
-
-Overall project rating: 7/10
-
-==================================================
-FILES INSPECTED
-==================================================
-
-- main.py
-- run_gui.py
-- README.md
-- requirements.txt
-- app/__init__.py
-- app/automation/__init__.py
-- app/automation/config.py
-- app/automation/automation_engine.py
-- app/automation/keyboard_controller.py
-- app/automation/window_manager.py
-- app/core/__init__.py
-- app/core/models.py
-- app/core/csv_reader.py
-- app/core/text_parser.py
-- app/core/json_parser.py
-- app/core/parser_selector.py
-- app/gui/__init__.py
-- app/gui/app.py
-- app/gui/main_window.py
-- app/gui/preview_panel.py
-- app/gui/progress_panel.py
-- app/simulator/__init__.py
-- app/simulator/simulation_engine.py
-- app/tools/__init__.py
-- app/tools/logger.py
-- app/tools/window_detector.py
-- app/tools/screenshot_tool.py
-- app/tools/mouse_tracker.py
-- app/tools/test_tools.py
-- tests/test_automation.py
-- tests/test_csv_reader.py
-- tests/test_header.py
-- tests/test_header_live.py
-- tests/test_item_entry.py
-- tests/test_json_parser.py
-- tests/test_login.py
-- tests/test_medicine_live.py
-- tests/test_open_purchase.py
-- tests/test_run.py
-- tests/test_simulation.py
-- tests/test_text_parser.py
-- tests/test_window_focus.py
-- tests/sample_invoice.csv
-
-==================================================
-FILES MODIFIED
-==================================================
-
-- main.py
-- README.md
-- requirements.txt
-- app/core/json_parser.py
-- tests/test_json_parser.py
-- note.txt
-
-==================================================
-ISSUES FOUND
-==================================================
-
-1. main.py did not start the actual GUI application.
-   - Impact: A fresh Windows install following README instructions would run main.py and only print a startup message.
-   - Severity: Production readiness bug.
-
-2. README.md was stale.
-   - Impact: It described only a base project scaffold and did not document the actual GUI, JSON support, verification command, or current configuration points.
-   - Severity: Production readiness/documentation bug.
-
-3. requirements.txt contained unused packages.
-   - Removed unused dependencies: keyboard, mouse, opencv-python, pyperclip, psutil.
-   - Impact: Fresh installs would request unnecessary packages and permissions/surface area.
-   - Severity: Maintainability/security hygiene issue.
-
-4. JSON parser only accepted invoice fields at the root object.
-   - Impact: Common API output such as {"invoice": {...}} would fail validation even though it is a reasonable production JSON shape.
-   - Severity: Correctness/robustness issue.
-
-5. JSON item list key normalization was incomplete.
-   - Impact: "medicine_list" normalizes to "medicine list", but the accepted list keys did not include that normalized spelling.
-   - Severity: Correctness issue.
-
-==================================================
-FIXES MADE
-==================================================
+# TASK - Add "Copy ChatGPT Prompt" Button
 
-1. Updated main.py to launch the GUI through app.gui.app.main.
-
-2. Rewrote README.md to match the current application:
-   - Windows/Pharma Ultimate requirement.
-   - Installation steps.
-   - Running via python main.py or python run_gui.py.
-   - Structured Text and JSON input modes.
-   - Test verification command.
-   - Configuration location.
-
-3. Cleaned requirements.txt to keep only packages imported by the current code path:
-   - pyautogui
-   - pywinauto
-   - pygetwindow
-   - pillow
+Goal:
 
-4. Improved app/core/json_parser.py:
-   - Added support for nested invoice payloads under "invoice" / "purchase invoice" / "purchase_invoice".
-   - Fixed normalized item list key support for "medicine list".
+Embed the official ChatGPT extraction prompt inside the application so employees never have to keep it separately.
 
-5. Added regression coverage in tests/test_json_parser.py:
-   - Verifies nested JSON invoice payloads parse into the same Invoice model.
-   - Verifies "medicine_list" input works.
-   - Keeps existing structured text and JSON parser coverage intact.
-
-==================================================
-VERIFICATION PERFORMED
-==================================================
-
-Focused parser verification:
-
-python -m pytest tests/test_json_parser.py tests/test_text_parser.py tests/test_csv_reader.py
-
-Result:
-
-10 passed
-
-Full test suite:
-
-python -m pytest
-
-Result:
-
-44 passed
-
-Syntax/import verification:
-
-python -m compileall app tests main.py run_gui.py
-
-Result:
-
-Passed
-
-Import smoke check:
-
-- Imported main.
-- Verified main.main is callable.
-- Imported parser selector constants and parse_invoice_input.
-
-Result:
-
-Passed
-
-Security scan performed:
-
-- Checked for eval/exec usage.
-- Checked for committed local /Users paths.
-- Checked for hardcoded credentials.
-
-Result:
-
-- No dangerous eval/exec found.
-- No local /Users paths found in application files.
-- USERNAME and PASSWORD are empty config placeholders, not committed secrets.
-
-==================================================
-REMAINING RISKS
-==================================================
-
-1. Live Pharma Ultimate behavior cannot be fully verified on this macOS audit machine.
-   - The automated tests mock the Windows/Pharma interaction.
-   - Before daily office deployment, run one supervised end-to-end import on the actual Windows office PC.
-
-2. Pharma Ultimate path is still a default configuration value:
-   - C:\PharmaUltimate\PharmaUltimate.exe
-   - This must be confirmed on the target PC.
-
-3. Login credentials are intentionally empty in config.py.
-   - They must be configured securely on the office PC before real use.
-
-4. Keyboard automation remains sensitive to Pharma Ultimate UI focus and layout.
-   - The current code has timeouts, logging, and tested navigation logic, but real UI drift can still require config adjustment.
-
-==================================================
-PRODUCTION READINESS ASSESSMENT
-==================================================
-
-The codebase is cleaner and more production-ready after this audit:
-
-- The documented entry point now starts the real GUI.
-- Dependencies are reduced to current runtime needs.
-- Structured Text, JSON, and CSV parsing are covered by tests.
-- JSON parsing is more robust for API-shaped payloads.
-- Validation is shared across parsers.
-- Automation has timeout handling and detailed trace logging.
-- Full automated verification passes.
-
-However, this should not yet be deployed for unsupervised daily employee use until a final live Windows/Pharma Ultimate acceptance test is completed on the actual target machine.
-
-==================================================
-FINAL ANSWER
-==================================================
-
-NO
-
-Must still be fixed/confirmed before real office daily use:
-
-1. Run a supervised end-to-end import on the actual Windows PC with Pharma Ultimate installed.
-2. Confirm app/automation/config.py points to the real Pharma Ultimate executable path.
-3. Configure login credentials securely for the office machine.
-4. Confirm the real Pharma Ultimate UI field order still matches the tested keyboard navigation.
+Requirements:
+
+1. Add a button near the input area:
+
+Copy ChatGPT Prompt
+
+2. When clicked:
+
+- Copy the complete official prompt to the clipboard.
+- Show a small success message:
+
+"ChatGPT prompt copied to clipboard."
+
+3. Store the prompt in a separate file:
+
+app/core/chatgpt_prompt.py
+
+Example:
+
+CHATGPT_PROMPT = """..."""
+
+Do not hardcode the prompt inside the GUI.
+
+4. The GUI should simply import:
+
+from app.core.chatgpt_prompt import CHATGPT_PROMPT
+
+5. Keep the existing workflow unchanged.
+
+Employee workflow:
+
+Open ChatGPT
+↓
+
+Click "Copy ChatGPT Prompt"
+↓
+
+Paste prompt into ChatGPT
+↓
+
+Upload invoice PDF
+↓
+
+Copy ChatGPT output
+↓
+
+Paste into Purchase Assistant
+↓
+
+Preview
+↓
+
+Import
+
+No other functionality should change.
+
+Deliverables:
+
+- Files modified
+- Button added
+- Clipboard copy implemented
+- Success message added
+
+
+Correct Final Prompt: 
+
+Extract the purchase invoice into the EXACT format below.
+
+Rules:
+
+1. Do NOT skip any medicine.
+2. Keep medicine names exactly as printed.
+3. Keep batch numbers exactly as printed.
+4. Invoice Date format: DD-MM-YYYY.
+5. Expiry format: DD-MM-YYYY (Example: 01-05-2028).
+6. Quantity = invoice quantity.
+7. Free = invoice free quantity (use 0 if not present).
+8. PRATE = PTS column.
+9. MRP = MRP column.
+10. SRATE = PTR column.
+11. DISCOUNT = Discount column (use 0.00 if not present).
+12. Please send me the data in copy-pastable format only.
+13. Return ONLY the structured text below.
+14. Do NOT add explanations, markdown, code blocks, or any extra text.
+
+Format:
+
+SUPPLIER: <Supplier Name>
+INVOICE_NO: <Invoice Number>
+INVOICE_DATE: <DD-MM-YYYY>
+
+ITEMS
+
+1.
+NAME: ...
+BATCH: ...
+EXPIRY: ...
+QTY: ...
+FREE: ...
+PRATE: ...
+MRP: ...
+SRATE: ...
+DISCOUNT: ...
+
+2.
+...
+
+Continue until every medicine from the invoice has been extracted.

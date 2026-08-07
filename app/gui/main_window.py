@@ -4,6 +4,7 @@ import traceback
 from tkinter import messagebox, ttk
 
 from app.automation.automation_engine import PurchaseAutomation
+from app.core.chatgpt_prompt import CHATGPT_PROMPT
 from app.core.parser_selector import PARSER_CHOICES, STRUCTURED_TEXT, parse_invoice_input
 from app.gui.preview_panel import PreviewPanel
 from app.gui.progress_panel import ProgressPanel
@@ -60,21 +61,30 @@ class PurchaseAssistantWindow(tk.Tk):
         input_panel = ttk.Frame(content, style="Panel.TFrame", padding=16)
         input_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 16))
 
-        ttk.Label(input_panel, text="Paste ChatGPT Output", style="PanelTitle.TLabel").grid(
+        input_header = ttk.Frame(input_panel, style="Panel.TFrame")
+        input_header.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+
+        ttk.Label(input_header, text="Paste ChatGPT Output", style="PanelTitle.TLabel").grid(
             row=0,
             column=0,
             sticky="w",
-            pady=(0, 12),
         )
 
+        ttk.Button(
+            input_header,
+            text="Copy ChatGPT Prompt",
+            command=self.copy_chatgpt_prompt,
+        ).grid(row=0, column=1, padx=(12, 0), sticky="e")
+
         parser_selector = ttk.Combobox(
-            input_panel,
+            input_header,
             textvariable=self.parser_var,
             values=PARSER_CHOICES,
             state="readonly",
             width=18,
         )
-        parser_selector.grid(row=0, column=0, sticky="e", pady=(0, 12))
+        parser_selector.grid(row=0, column=2, sticky="e", padx=(12, 0))
+        input_header.columnconfigure(0, weight=1)
 
         self.input_text = tk.Text(
             input_panel,
@@ -139,6 +149,15 @@ class PurchaseAssistantWindow(tk.Tk):
         self.preview_panel.display_invoice(self.current_invoice)
         self.progress_panel.set_progress(0)
         self.progress_panel.set_status("Preview Ready")
+
+    def copy_chatgpt_prompt(self):
+        self.clipboard_clear()
+        self.clipboard_append(CHATGPT_PROMPT)
+        self.update()
+        messagebox.showinfo(
+            "Copy ChatGPT Prompt",
+            "ChatGPT prompt copied to clipboard.",
+        )
 
     def start_import(self):
         print("[GUI] Start Import clicked")
