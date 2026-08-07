@@ -1,5 +1,6 @@
 import tkinter as tk
 import threading
+import traceback
 from tkinter import messagebox, ttk
 
 from app.automation.automation_engine import PurchaseAutomation
@@ -130,6 +131,7 @@ class PurchaseAssistantWindow(tk.Tk):
         self.progress_panel.set_status("Preview Ready")
 
     def start_import(self):
+        print("[GUI] Start Import clicked")
         if self.is_import_running:
             messagebox.showinfo("Start Import", "Import is already running.")
             return
@@ -140,7 +142,11 @@ class PurchaseAssistantWindow(tk.Tk):
         if self.current_invoice is None:
             return
 
+        print("[GUI] Invoice object received")
+        print(f"[GUI] Invoice has {len(self.current_invoice.items)} items")
+
         if self.current_invoice.validation_errors:
+            print("[GUI] Validation failed before automation")
             messagebox.showerror(
                 "Validation Failed",
                 "\n".join(self.current_invoice.validation_errors),
@@ -179,8 +185,12 @@ class PurchaseAssistantWindow(tk.Tk):
 
     def _run_import(self, invoice):
         try:
+            print("[GUI] Worker entered")
+            print("[GUI] Calling PurchaseAutomation.run()")
             summary = self.automation.run(invoice)
+            print("[GUI] PurchaseAutomation.run() returned")
         except Exception as error:
+            traceback.print_exc()
             self.after(0, self._show_import_error, error)
             return
 

@@ -168,6 +168,8 @@ def parse_item(row_data, row_number):
 def validate_invoice(invoice):
     if not invoice.supplier_name:
         invoice.validation_errors.append("Supplier Name is required.")
+    if not invoice.items:
+        invoice.validation_errors.append("At least one medicine is required.")
 
     for item in invoice.items:
         invoice.validation_errors.extend(item.validation_errors)

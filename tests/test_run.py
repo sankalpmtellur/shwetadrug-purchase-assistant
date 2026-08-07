@@ -84,6 +84,24 @@ def test_run_failure_summary_when_login_fails():
     assert summary.saved_successfully is False
 
 
+def test_run_reaches_launch_pharma_through_login():
+    invoice = make_invoice()
+    automation = PurchaseAutomation()
+
+    with patch.object(automation, "launch_pharma", return_value=True) as launch_pharma, \
+        patch("app.automation.automation_engine.wait_for_window", return_value=True), \
+        patch("app.automation.automation_engine.keyboard_controller.write", return_value=True), \
+        patch("app.automation.automation_engine.keyboard_controller.press_enter", return_value=True), \
+        patch.object(automation, "open_purchase_window", return_value=False), \
+        patch("app.automation.automation_engine.get_import_logger"):
+        summary = automation.run(invoice)
+
+    launch_pharma.assert_called_once()
+    assert summary.total_medicines == 1
+    assert summary.imported_successfully == 0
+    assert summary.failed == 1
+
+
 def test_import_summary_generation():
     invoice = make_invoice()
     automation = PurchaseAutomation()
@@ -178,5 +196,6 @@ if __name__ == "__main__":
     test_save_purchase_failure_path()
     test_run_complete_success_workflow()
     test_run_failure_summary_when_login_fails()
+    test_run_reaches_launch_pharma_through_login()
     test_import_summary_generation()
     test_run_receives_all_parsed_text_items()

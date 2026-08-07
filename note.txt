@@ -1,99 +1,136 @@
-# BUG - Import Completes Immediately (Imported: 0, Failed: 0)
+# BUG - Import Still Completes Immediately (Imported: 0, Failed: 0)
 
-## Problem
+The previous parser fix did not solve the issue.
 
-After:
+Behavior is still:
+
 - Paste structured text
-- Preview (Validation successful)
-- Start Import
-
-The application immediately shows:
+- Preview → Validation successful
+- Click Start Import
+- Immediately shows:
 
 Import Completed
 Imported: 0
 Failed: 0
 Duration: 0s
 
+No Pharma Ultimate window is focused.
+No keyboard input occurs.
 No automation starts.
 
-## Investigate
+==================================================
+DO NOT GUESS.
+TRACE THE ACTUAL EXECUTION.
+==================================================
 
-Trace the complete execution flow:
+Add logging to EVERY major step.
 
-Structured Text
-    ↓
-StructuredTextParser.parse()
-    ↓
-Invoice object
-    ↓
-Preview
-    ↓
-Start Import
-    ↓
-PurchaseAutomation.run(invoice)
-    ↓
+GUI:
+
+Start Import clicked
+
+↓
+
+Parsed invoice object
+
+↓
+
+PurchaseAutomation.run()
+
+↓
+
+launch_pharma()
+
+↓
+
+login()
+
+↓
+
+open_purchase_window()
+
+↓
+
 fill_header()
-    ↓
+
+↓
+
 fill_items()
 
-Determine exactly where execution stops.
+↓
 
-## Verify
+save_purchase()
 
-1. How many items exist in invoice.items immediately after parsing?
-2. How many items are passed into PurchaseAutomation.run()?
-3. Is fill_header() being called?
-4. Is fill_items() being called?
-5. Is there any early return when invoice.items is empty?
-6. Is Start Import accidentally creating a new empty Invoice instead of using the parsed Invoice?
+Print before and after EVERY function.
 
-## Add Temporary Logging
+Example:
 
-Print logs like:
-
-Invoice parsed: X items
-Invoice passed to automation: X items
-Automation started
-Filling header...
-Filling items...
-Entering item 1
-Entering item 2
+[GUI] Start Import clicked
+[GUI] Invoice object received
+[GUI] Invoice has X items
+[AUTO] run() entered
+[AUTO] launch_pharma()
+[AUTO] login()
+[AUTO] open_purchase_window()
+[AUTO] fill_header()
+[AUTO] fill_items()
+[AUTO] Item 1
+[AUTO] Item 2
 ...
-Automation finished
+[AUTO] Finished
 
-## Expected
+==================================================
+ALSO CHECK
+==================================================
 
-For the provided invoice:
+1. Is PurchaseAutomation.run() actually being called?
 
-Invoice parsed: 6 items
-Invoice passed to automation: 6 items
-Automation started
-Header entered
-Entering item 1
-Entering item 2
-...
-Entering item 6
-Automation complete
+2. Is it running in a background thread that exits immediately?
 
-## Goal
+3. Is an exception occurring inside the worker thread but being swallowed?
 
-Identify and fix the reason why automation exits immediately with:
+4. Is run() returning before launch_pharma()?
+
+5. Wrap run() in:
+
+try:
+    ...
+except Exception:
+    import traceback
+    traceback.print_exc()
+    raise
+
+Do NOT silently ignore exceptions.
+
+6. Search the project for:
+
+return ImportSummary(
+imported=0,
+failed=0
+
+Find every place where this summary can be returned.
+
+Determine exactly which code path is producing it.
+
+==================================================
+GOAL
+==================================================
+
+Do not make assumptions.
+
+Identify the EXACT line of code responsible for:
 
 Imported: 0
 Failed: 0
 
-Do not modify:
-- GUI
-- Parser format
-- Validation
-- Preview
-- Automation workflow
+Then fix only that issue.
 
-Only fix the underlying cause and remove the premature exit.
-
-## Deliverables
+==================================================
+DELIVERABLES
+==================================================
 
 - Files modified
-- Root cause
-- What was fixed
-- Confirmation that automation now processes all parsed items correctly.
+- Exact root cause
+- Exact line/function responsible
+- Fix implemented
+- Confirmation that PurchaseAutomation.run() is actually executed and reaches launch_pharma().

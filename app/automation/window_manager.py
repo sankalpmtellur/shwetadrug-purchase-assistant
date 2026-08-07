@@ -20,10 +20,16 @@ def find_pharma_window(title=WINDOW_TITLE):
         log_action("Find Pharma window", False, f"pygetwindow unavailable: {error}")
         return None
 
+    try:
+        windows = gw.getAllWindows()
+    except Exception as error:
+        log_action("Find Pharma window", False, str(error))
+        return None
+
     matches = [
         window
-        for window in gw.getAllWindows()
-        if title.lower() in window.title.lower()
+        for window in windows
+        if title.lower() in str(window.title).lower()
     ]
 
     if matches:

@@ -80,6 +80,24 @@ MRP: xyz
     assert "Row 1: Quantity must be numeric." in invoice.validation_errors
 
 
+def test_parse_invoice_text_requires_at_least_one_medicine():
+    invoice = parse_invoice_text(
+        """
+Supplier:
+Ajit Agencies
+
+Invoice Number:
+12345
+
+Invoice Date:
+03-08-2026
+"""
+    )
+
+    assert len(invoice.items) == 0
+    assert "At least one medicine is required." in invoice.validation_errors
+
+
 def test_parse_real_world_text_with_six_medicines():
     invoice = parse_invoice_text(
         """
@@ -185,4 +203,5 @@ Discount: 4
 if __name__ == "__main__":
     test_parse_invoice_text()
     test_parse_invoice_text_validation_reuses_existing_rules()
+    test_parse_invoice_text_requires_at_least_one_medicine()
     test_parse_real_world_text_with_six_medicines()

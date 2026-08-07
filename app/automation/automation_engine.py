@@ -1,5 +1,6 @@
 import subprocess
 import time
+import traceback
 from datetime import date, datetime
 
 from app.automation import config
@@ -32,6 +33,7 @@ class PurchaseAutomation:
         return False
 
     def launch_pharma(self):
+        print("[AUTO] launch_pharma() entered")
         self._log_action("launch_pharma", True, "Starting")
 
         if is_pharma_running(config.WINDOW_TITLE):
@@ -39,6 +41,7 @@ class PurchaseAutomation:
             maximized = maximize_pharma_window(config.WINDOW_TITLE)
             success = brought_to_front and maximized
             self._log_action("launch_pharma", success, "Existing window path")
+            print(f"[AUTO] launch_pharma() returned {success}")
             return success
 
         try:
@@ -46,6 +49,7 @@ class PurchaseAutomation:
             self._log_action("launch_pharma", True, f"Launched {config.PHARMA_EXE_PATH}")
         except Exception as error:
             self._log_action("launch_pharma", False, str(error))
+            print("[AUTO] launch_pharma() returned False")
             return False
 
         window_found = wait_for_window(
@@ -54,11 +58,16 @@ class PurchaseAutomation:
             poll_interval=config.POLL_INTERVAL,
         )
         self._log_action("launch_pharma", window_found, "Launch path")
+        print(f"[AUTO] launch_pharma() returned {window_found}")
         return window_found
 
     def login(self):
-        if not self.launch_pharma():
+        print("[AUTO] login() entered")
+        launch_success = self.launch_pharma()
+        print(f"[AUTO] login() launch_pharma returned {launch_success}")
+        if not launch_success:
             self._log_action("login", False, "Unable to launch or focus Pharma")
+            print("[AUTO] login() returned False")
             return False
 
         login_ready = wait_for_window(
@@ -68,6 +77,7 @@ class PurchaseAutomation:
         )
         if not login_ready:
             self._log_action("login", False, "Login window never appeared")
+            print("[AUTO] login() returned False")
             return False
 
         steps = [
@@ -79,6 +89,7 @@ class PurchaseAutomation:
 
         if not all(steps):
             self._log_action("login", False, "Login key sequence failed")
+            print("[AUTO] login() returned False")
             return False
 
         loaded = wait_for_window(
@@ -87,19 +98,23 @@ class PurchaseAutomation:
             poll_interval=config.POLL_INTERVAL,
         )
         self._log_action("login", loaded, "Main application load")
+        print(f"[AUTO] login() returned {loaded}")
         return loaded
 
     def open_purchase_window(self):
+        print("[AUTO] open_purchase_window() entered")
         self._log_action("open_purchase_window", True, "Starting")
 
         brought_to_front = bring_pharma_to_front(config.WINDOW_TITLE)
         maximized = maximize_pharma_window(config.WINDOW_TITLE)
         if not (brought_to_front and maximized):
             self._log_action("open_purchase_window", False, "Main window not active")
+            print("[AUTO] open_purchase_window() returned False")
             return False
 
         if not keyboard_controller.press_ctrl_p():
             self._log_action("open_purchase_window", False, "Ctrl+P failed")
+            print("[AUTO] open_purchase_window() returned False")
             return False
 
         purchase_ready = wait_for_window(
@@ -109,14 +124,16 @@ class PurchaseAutomation:
         )
         if not purchase_ready:
             self._log_action("open_purchase_window", False, "Purchase Bill window not ready")
+            print("[AUTO] open_purchase_window() returned False")
             return False
 
         cursor_ready = self.verify_date_field_ready()
         self._log_action("open_purchase_window", cursor_ready, "Date field ready")
+        print(f"[AUTO] open_purchase_window() returned {cursor_ready}")
         return cursor_ready
 
     def fill_header(self, invoice):
-        print("Filling header...")
+        print("[AUTO] fill_header() entered")
         self._log_action("fill_header", True, "Starting")
 
         invoice_date = format_invoice_date(invoice.invoice_date)
@@ -144,10 +161,11 @@ class PurchaseAutomation:
 
         success = all(steps)
         self._log_action("Header Complete", success)
+        print(f"[AUTO] fill_header() returned {success}")
         return success
 
     def fill_items(self, invoice):
-        print("Filling items...")
+        print("[AUTO] fill_items() entered")
         total = len(invoice.items)
         successful_items = 0
         failed_items = []
@@ -161,7 +179,7 @@ class PurchaseAutomation:
             if total:
                 progress_value = 50 + int((index / total) * 35)
             self._set_progress(f"Medicine {index} / {total}", progress_value)
-            print(f"Entering item {index}")
+            print(f"[AUTO] Item {index}")
             self._log_action(
                 f"Medicine {index} / {total}",
                 True,
@@ -184,25 +202,34 @@ class PurchaseAutomation:
                 item.medicine_name,
             )
 
-        return ImportResult(
+        result = ImportResult(
             total=total,
             success=successful_items,
             failed=len(failed_items),
             failed_items=failed_items,
         )
+        print(
+            "[AUTO] fill_items() returned "
+            f"success={result.success} failed={result.failed}"
+        )
+        return result
 
     def save_purchase(self):
+        print("[AUTO] save_purchase() entered")
         if self._should_stop():
+            print("[AUTO] save_purchase() returned False")
             return False
 
         self._log_action("save_purchase", True, "Starting")
 
         if not press_enters(config.SAVE_BUTTON_ENTER_COUNT):
             self._log_action("save_purchase", False, "Could not focus Save button")
+            print("[AUTO] save_purchase() returned False")
             return False
 
         if not keyboard_controller.press_enter():
             self._log_action("save_purchase", False, "Save button submit failed")
+            print("[AUTO] save_purchase() returned False")
             return False
 
         confirmation_ready = wait_for_window(
@@ -212,10 +239,12 @@ class PurchaseAutomation:
         )
         if not confirmation_ready:
             self._log_action("save_purchase", False, "Confirmation popup not found")
+            print("[AUTO] save_purchase() returned False")
             return False
 
         if not keyboard_controller.press_enter():
             self._log_action("save_purchase", False, "Confirmation submit failed")
+            print("[AUTO] save_purchase() returned False")
             return False
 
         closed = wait_for_window_closed(
@@ -224,61 +253,71 @@ class PurchaseAutomation:
             poll_interval=config.POLL_INTERVAL,
         )
         self._log_action("save_purchase", closed, "Purchase Entry closed")
+        print(f"[AUTO] save_purchase() returned {closed}")
         return closed
 
     def run(self, invoice):
-        self.stop_requested = False
-        start_time = datetime.now()
-        self.import_logger = get_import_logger(start_time)
-        self._set_progress("Preparing...", 0)
-        print(f"Invoice passed to automation: {len(invoice.items)} items")
-        print("Automation started")
-        self._log_action("run", True, "Starting import")
+        print("[AUTO] run() entered")
+        try:
+            self.stop_requested = False
+            start_time = datetime.now()
+            self.import_logger = get_import_logger(start_time)
+            self._set_progress("Preparing...", 0)
+            print(f"[AUTO] Invoice passed to automation: {len(invoice.items)} items")
+            self._log_action("run", True, "Starting import")
 
-        import_result = ImportResult(
-            total=len(invoice.items),
-            success=0,
-            failed=len(invoice.items),
-            failed_items=list(invoice.items),
-        )
-        saved_successfully = False
+            import_result = ImportResult(
+                total=len(invoice.items),
+                success=0,
+                failed=len(invoice.items),
+                failed_items=list(invoice.items),
+            )
+            saved_successfully = False
 
-        if self._should_stop():
-            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+            if self._should_stop():
+                return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
-        self._set_progress("Opening Pharma...", 10)
-        self._set_progress("Logging In...", 20)
-        if not self.login():
-            self._log_action("run", False, "Login failed")
-            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+            self._set_progress("Opening Pharma...", 10)
+            self._set_progress("Logging In...", 20)
+            print("[AUTO] login()")
+            if not self.login():
+                self._log_action("run", False, "Login failed")
+                return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
-        if self._should_stop():
-            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+            if self._should_stop():
+                return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
-        self._set_progress("Opening Purchase Window...", 35)
-        if not self.open_purchase_window():
-            self._log_action("run", False, "Purchase window failed")
-            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+            self._set_progress("Opening Purchase Window...", 35)
+            print("[AUTO] open_purchase_window()")
+            if not self.open_purchase_window():
+                self._log_action("run", False, "Purchase window failed")
+                return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
-        if self._should_stop():
-            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+            if self._should_stop():
+                return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
-        self._set_progress("Entering Header...", 50)
-        if not self.fill_header(invoice):
-            self._log_action("run", False, "Header entry failed")
-            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+            self._set_progress("Entering Header...", 50)
+            print("[AUTO] fill_header()")
+            if not self.fill_header(invoice):
+                self._log_action("run", False, "Header entry failed")
+                return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
-        import_result = self.fill_items(invoice)
+            print("[AUTO] fill_items()")
+            import_result = self.fill_items(invoice)
 
-        if self._should_stop():
-            return self._build_summary(invoice, import_result, start_time, saved_successfully)
+            if self._should_stop():
+                return self._build_summary(invoice, import_result, start_time, saved_successfully)
 
-        self._set_progress("Saving...", 90)
-        saved_successfully = self.save_purchase()
-        summary = self._build_summary(invoice, import_result, start_time, saved_successfully)
-        self._set_progress("Completed", 100)
-        print("Automation complete")
-        return summary
+            self._set_progress("Saving...", 90)
+            print("[AUTO] save_purchase()")
+            saved_successfully = self.save_purchase()
+            summary = self._build_summary(invoice, import_result, start_time, saved_successfully)
+            self._set_progress("Completed", 100)
+            print("[AUTO] Finished")
+            return summary
+        except Exception:
+            traceback.print_exc()
+            raise
 
     def verify_date_field_ready(self):
         self._log_action("verify_date_field_ready", True, "Assuming active field after window ready")
