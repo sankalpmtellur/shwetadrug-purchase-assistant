@@ -186,26 +186,26 @@ class PurchaseAutomation:
         steps.append(keyboard_controller.write(invoice_date))
         print("Entered Invoice Date")
 
-        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_INVOICE_DATE))
+        for field_name in config.HEADER_ENTER_ONLY_FIELDS:
+            print(f"{field_name}...")
+            steps.append(press_enters_with_debug(1))
 
         print("Entering Supplier...")
         self._log_action("Entering Supplier", True, invoice.supplier_name)
         steps.append(select_supplier(invoice.supplier_name))
         print("Entered Supplier")
 
-        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_SUPPLIER))
-
-        print("Entering Bill Number...")
-        self._log_action("Entering Bill Number", True, invoice.invoice_number)
+        print("Entering Supplier Bill No...")
+        self._log_action("Entering Supplier Bill No", True, invoice.invoice_number)
         steps.append(keyboard_controller.write(invoice.invoice_number))
-        print("Entered Bill Number")
-        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_BILL_NUMBER))
+        print("Entered Supplier Bill No")
+        steps.append(press_enters_with_debug(1))
 
-        print("Entering Bill Date...")
-        self._log_action("Entering Bill Date", True, today)
+        print("Entering Supplier Bill Date...")
+        self._log_action("Entering Supplier Bill Date", True, today)
         steps.append(keyboard_controller.write(today))
-        print("Entered Bill Date")
-        steps.append(press_enters_with_debug(config.HEADER_ENTERS_AFTER_BILL_DATE))
+        print("Entered Supplier Bill Date")
+        steps.append(press_enters_with_debug(1))
 
         success = all(steps)
         self._log_action("Header Complete", success)
@@ -235,6 +235,7 @@ class PurchaseAutomation:
             )
 
             try:
+                print(f"Medicine {index}")
                 self._fill_single_item(item)
             except Exception as error:
                 failed_items.append(item)
@@ -397,7 +398,11 @@ class PurchaseAutomation:
         print("Entered Batch")
 
         print("Entering Expiry...")
-        self._require_step("Entering Expiry", lambda: enter_if_not_blank(item.expiry), item.medicine_name)
+        self._require_step(
+            "Entering Expiry",
+            lambda: enter_if_not_blank(format_expiry_date(item.expiry)),
+            item.medicine_name,
+        )
         print("Entered Expiry")
 
         print("Entering Quantity...")
@@ -661,11 +666,34 @@ def format_invoice_date(invoice_date):
 
     for date_format in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%Y/%m/%d"):
         try:
-            return datetime.strptime(value, date_format).strftime("%d/%m/%Y")
+            return datetime.strptime(value, date_format).strftime("%d-%m-%Y")
         except ValueError:
             continue
 
-    return value.replace("-", "/")
+    return value.replace("/", "-")
+
+
+def format_expiry_date(expiry_date):
+    value = str(expiry_date).strip()
+    if not value:
+        return ""
+
+    normalized = value.replace(".", "-").replace("/", "-")
+    parts = normalized.split("-")
+
+    if len(parts) == 3:
+        day, month, year = parts
+        if len(year) == 2:
+            year = f"20{year}"
+        return f"{day.zfill(2)}-{month.zfill(2)}-{year}"
+
+    if len(parts) == 2:
+        month, year = parts
+        if len(year) == 2:
+            year = f"20{year}"
+        return f"01-{month.zfill(2)}-{year}"
+
+    return normalized
 
 
 def format_today_date():

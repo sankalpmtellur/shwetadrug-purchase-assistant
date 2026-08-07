@@ -67,7 +67,7 @@ def test_fill_items_sequence():
         medicine.assert_called_once_with("Dolo 650")
         assert [call.args[0] for call in write.call_args_list] == [
             "B001",
-            "01.10.27",
+            "01-10-2027",
             "10",
             "1",
             "12.50",
@@ -75,7 +75,7 @@ def test_fill_items_sequence():
             "18.00",
             "5",
         ]
-        assert enter.call_count == 10
+        assert enter.call_count == 13
 
 
 def test_fill_items_failure_continues():

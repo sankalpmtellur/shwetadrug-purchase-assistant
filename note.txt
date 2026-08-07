@@ -1,111 +1,149 @@
-# TASK - Fix Pharma Ultimate Keyboard Navigation
+# TASK - Update Pharma Ultimate Navigation to Match Real Workflow
 
-Great progress.
+The previous navigation was based on assumptions. Replace it with the following EXACT workflow.
 
-The automation now:
+==========================================
+HEADER
+==========================================
 
-- Launches Pharma Ultimate
-- Logs in
-- Opens the Purchase window (Ctrl + P)
-- Starts entering data
+1. Open Pharma Ultimate
+2. Press Ctrl + P
 
-However, almost every field is entered into the wrong place.
+3. Invoice Date
+- Value: invoice.invoice_date
+- Format: DD-MM-YYYY
+- Press Enter
 
-Observed issues:
+4. Cr Credit
+- Press Enter
 
-- Supplier name is incorrect or entered into the wrong field.
-- Invoice date is incorrect or entered into the wrong field.
-- Invoice number is incorrect or entered into the wrong field.
-- Medicine names are entered into the wrong field.
-- Batch numbers are shifted.
-- Expiry dates are shifted.
-- Quantity, rates, discount etc. are all misaligned.
+5. P Purc.
+- Press Enter
 
-This indicates that the parser is working, but the keyboard navigation does not match the actual Pharma Ultimate UI.
+6. SR No: P
+- Press Enter
 
-==================================================
+7. Received
+- Press Enter
 
-Do NOT change:
+8. Supplier
+- Value: invoice.supplier
+- Press Enter
 
-- Parser
-- GUI
-- Validation
-- Import flow
+9. Supplier Bill No
+- Value: invoice.invoice_number
+- Press Enter
 
-Only fix the keyboard navigation.
+10. Supplier Bill Date
+- Value: Today's system date (NOT invoice date)
+- Format: DD-MM-YYYY
+- Press Enter
 
-==================================================
+==========================================
+ITEM ENTRY
+==========================================
 
-For EVERY field, add debug prints like:
+11. SI No
+- Auto-generated
+- Press Enter
 
-Entering Invoice Date...
-Entered Invoice Date
+12. Item Description
+- Value: medicine.name
+- Press Enter
 
-Press Enter
+13. Batch No
+- Value: medicine.batch
+- Press Enter
 
-Entering Supplier...
-Entered Supplier
-
-Press Enter
-
-Entering Bill Number...
-Entered Bill Number
-
-...
-
-For every medicine:
-
-Press Enter (SI No)
-
-Entering Medicine Name...
-
-Selecting Medicine...
-
-Entering Batch...
-
-Entering Expiry...
-
-Entering Quantity...
-
-Entering Free...
-
-Entering Purchase Rate...
-
-Entering MRP...
-
-Entering Sale Rate...
-
-Entering Discount...
-
-Press Enter...
-
-==================================================
-
-Also make ALL keyboard delays configurable.
+14. Expiry Date
+- Value: medicine.expiry
+- Required format:
+  DD-MM-YYYY
 
 Example:
+01-02-2028
+01-05-2028
+01-12-2027
 
-KEY_DELAY = 0.20
-FIELD_DELAY = 0.30
-SEARCH_DELAY = 0.80
+- Press Enter
 
-These should be editable from config.py.
+15. Quantity
+- Value: medicine.quantity
+- Press Enter
 
-==================================================
+16. Free
+- Value: medicine.free
+- Press Enter
 
+17. Purchase Rate
+- Value: medicine.purchase_rate (PTS)
+- Press Enter
+
+18. MRP
+- Value: medicine.mrp
+- Press Enter
+
+19. Sale Rate
+- Value: medicine.sale_rate (PTR)
+- Press Enter
+
+20. Discount
+- Value: medicine.discount
+- Press Enter
+
+21. Press Enter exactly 4 times.
+
+After the 4th Enter, Pharma Ultimate reaches the next SI No.
+
+Repeat again from Step 11.
+
+==========================================
 IMPORTANT
+==========================================
 
-Do not assume the field positions.
+Do not use any old navigation.
 
-The navigation should exactly match the actual Pharma Ultimate workflow.
+Completely replace the existing keyboard flow with this workflow.
 
-We will fine-tune it by comparing the automation with real manual entry.
+Also ensure:
 
-==================================================
+- Invoice date comes from the invoice.
+- Supplier comes from the invoice.
+- Supplier Bill No comes from the invoice.
+- Supplier Bill Date uses today's system date.
+- Expiry format is DD-MM-YYYY.
+- Purchase Rate = PTS.
+- Sale Rate = PTR.
 
-Deliverables
+==========================================
+DEBUG LOGGING
+==========================================
+
+Before every field print:
+
+Entering Invoice Date...
+Entering Supplier...
+Entering Supplier Bill No...
+Entering Supplier Bill Date...
+
+Medicine 1
+
+Entering Item Description...
+Entering Batch...
+Entering Expiry...
+Entering Quantity...
+Entering Free...
+Entering Purchase Rate...
+Entering MRP...
+Entering Sale Rate...
+Entering Discount...
+
+Print "Press Enter" whenever Enter is pressed.
+
+==========================================
+DELIVERABLES
+==========================================
 
 - Files modified
-- Navigation changes
-- Delay changes
-- Confirmation that every field now follows the intended workflow.
+- Navigation updated
+- Confirmation that the workflow exactly matches the sequence above.

@@ -9,6 +9,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.automation.automation_engine import (
     PurchaseAutomation,
+    format_expiry_date,
     format_invoice_date,
     format_today_date,
     select_supplier,
@@ -17,9 +18,15 @@ from app.core.models import Invoice
 
 
 def test_format_invoice_date():
-    assert format_invoice_date("2026-08-06") == "06/08/2026"
-    assert format_invoice_date("06-08-2026") == "06/08/2026"
-    assert format_invoice_date("06/08/2026") == "06/08/2026"
+    assert format_invoice_date("2026-08-06") == "06-08-2026"
+    assert format_invoice_date("06-08-2026") == "06-08-2026"
+    assert format_invoice_date("06/08/2026") == "06-08-2026"
+
+
+def test_format_expiry_date_for_pharma_entry():
+    assert format_expiry_date("01.10.27") == "01-10-2027"
+    assert format_expiry_date("01-02-2028") == "01-02-2028"
+    assert format_expiry_date("05/12/2027") == "05-12-2027"
 
 
 def test_format_today_date():
@@ -61,22 +68,19 @@ def test_fill_header_sequence_and_supplier_helper():
     with patch("app.automation.automation_engine.keyboard_controller.write", return_value=True) as write, \
         patch("app.automation.automation_engine.keyboard_controller.press_enter", return_value=True) as enter, \
         patch("app.automation.automation_engine.select_supplier", return_value=True) as supplier, \
-        patch("app.automation.automation_engine.format_today_date", return_value="06-08-2026"), \
-        patch("app.automation.config.HEADER_ENTERS_AFTER_INVOICE_DATE", 1), \
-        patch("app.automation.config.HEADER_ENTERS_AFTER_SUPPLIER", 0), \
-        patch("app.automation.config.HEADER_ENTERS_AFTER_BILL_NUMBER", 1), \
-        patch("app.automation.config.HEADER_ENTERS_AFTER_BILL_DATE", 1):
+        patch("app.automation.automation_engine.format_today_date", return_value="06-08-2026"):
         assert automation.fill_header(invoice) is True
 
-        assert write.call_args_list[0].args[0] == "06/08/2026"
+        assert write.call_args_list[0].args[0] == "06-08-2026"
         assert write.call_args_list[1].args[0] == "INV-1001"
         assert write.call_args_list[2].args[0] == "06-08-2026"
         supplier.assert_called_once_with("ABC Pharma")
-        assert enter.call_count == 3
+        assert enter.call_count == 6
 
 
 if __name__ == "__main__":
     test_format_invoice_date()
+    test_format_expiry_date_for_pharma_entry()
     test_format_today_date()
     test_open_purchase_window_success()
     test_select_supplier_types_progressively()
